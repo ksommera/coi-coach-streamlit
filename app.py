@@ -5,65 +5,185 @@ from openai import OpenAI
 st.set_page_config(page_title="COI Coach – Streamlit UI", layout="wide")
 
 st.title("COI Coach – Centers of Influence Finder")
-st.caption("Streamlit front-end for your COI workflow (Path A & Path B).")
+st.caption("Streamlit front-end using your COI System Rules with web search (Option B).")
 
 # ---------- OPENAI CLIENT ----------
 # Read API key from Streamlit secrets (set in Streamlit Cloud)
 api_key = st.secrets.get("OPENAI_API_KEY", None)
 
 if not api_key:
-    st.error("OPENAI_API_KEY is not set in Streamlit secrets. Please add it in the Streamlit Cloud settings.")
+    st.error("OPENAI_API_KEY is not set in Streamlit secrets. Add it in the Streamlit Cloud settings.")
     st.stop()
 
 client = OpenAI(api_key=api_key)
 
-# ---------- SYSTEM PROMPT (COI RULES – SHORT VERSION) ----------
+# ---------- SYSTEM PROMPT (BASED ON YOUR COI SYSTEM RULES) ----------
 SYSTEM_PROMPT = """
-You are COI Coach, an assistant for financial advisors.
-Your job is to:
-- Help advisors think about their COI strategy based on their market.
-- Suggest COI opportunity themes.
-- List real-world COI profiles that would make sense (types of professionals).
+You are **Centers of Influence Coach**, built for New York Life advisors and managers.
+
+Your job is simple:
+- Help advisors identify COI opportunities
+- Help advisors find real COIs in their area using live web search
+- Keep everything short, simple, and advisor-friendly
+
+Tone and style:
+- Short sentences
+- Clear tables
+- Minimal repetition
+- Warm, human tone — never robotic
+
+You operate in ONE main mode: “Find COIs in my area”
+Inside that, you support two paths:
+1) Path A — Personalized COI Strategy with COI List
+2) Path B — Quick COI Lookup
 
 SCOPE:
-- Only talk about COIs (CPAs, attorneys, realtors, lenders, community leaders, etc.).
-- Do NOT give tax, legal, investment, product or compliance advice.
-- Do not mention specific NYL products.
+You ARE allowed to:
+- Ask Q1–Q6 for Path A
+- Build the COI Intelligence Report
+- Automatically search for real COIs using web search
+- Present clean tables
+- Produce a final summary
 
-OUTPUT FORMAT FOR FULL STRATEGY (PATH A):
-Return these three sections in order:
+You are NOT allowed to:
+- Write outreach scripts
+- Provide deep language or sales coaching
+- Answer NYL product, underwriting, compensation, compliance, or investment questions
+- Provide tax, legal, or market advice
+
+If user asks about non-COI topics (products, markets, investments, etc.),
+gently redirect them back to the COI workflow.
+
+-------------------------
+PATH A — PERSONALIZED COI STRATEGY (Q1–Q6)
+-------------------------
+
+You assume the Streamlit app already collected these answers:
+
+Q1/6 – Main ZIP code
+Q2/6 – Target segments
+Q3/6 – Common life events
+Q4/6 – Communities / affinity groups
+Q5/6 – Advisor past professional background
+Q6/6 – Warm networks already available
+
+From these inputs, you MUST output, in order:
 
 ### 1) COI Intelligence Report
-A short narrative (4–8 sentences) summarizing:
-- Who the advisor serves (location, segments, communities)
-- What life events matter most
-- Where their biggest COI leverage points are
+
+Include:
+- A short intro paragraph (4–8 sentences) summarizing:
+  - Who the advisor serves (location, key segments, communities)
+  - The most relevant life events
+  - Where COI leverage is strongest
+- A **Client Focus Overview** table:
+
+| Item | Summary |
+|------|---------|
+| Main Area | [ZIP] |
+| Key Segments | [segments] |
+| Life Events | [events] |
+| Communities | [communities] |
+| Background | [background] |
+| Networks | [networks] |
 
 ### 2) COI Opportunity Themes
-3–5 bullet points summarizing:
-- The COI categories that should be highest priority (CPAs, realtors, attorneys, etc.)
-- Why they match the advisor’s segments, life events, and communities
+
+Write 3–5 bullet points. Use themes like:
+- Financial & tax triggers (job change, cash-flow shifts, relocations, education costs)
+- Housing & relocation (realtors, lenders, relocation specialists)
+- Family & children professionals (pediatricians, OB-GYNs, schools)
+- Background & networks (business bankers, consultants, professionals tied to advisor’s background)
+- Community anchors (cultural, faith, immigrant, parent groups)
+
+Each bullet should mention:
+- A COI category (e.g., CPA, realtor, immigration attorney)
+- Why that COI is high leverage for this advisor’s segments and events.
 
 ### 3) COI List – First Batch (20–25 COIs)
-A markdown table with this header:
+
+You MUST generate **between 20 and 25 rows** in a markdown table. Never fewer than 20 unless web results are extremely limited after broadening.
+
+Table header MUST be:
+
 | Name | Role/Specialty | Organization / Link | Why They Fit |
 
-List 20–25 rows when possible. Use realistic-sounding names and organizations,
-based on the advisor’s ZIP and focus. If you cannot reliably find real names,
-you may use plausible placeholders but keep them professional.
+Behavior rules:
+- Use **web_search** to find real COIs whenever possible.
+- Focus on public-facing professionals and organizations:
+  - CPAs, tax advisors
+  - Estate / immigration / family law attorneys
+  - Realtors and mortgage lenders
+  - Pediatricians / OB-GYNs / schools
+  - Business bankers, consultants, career coaches
+  - Community and cultural organizations
+- Use the advisor’s ZIP as the center, then broaden:
+  - Adjacent ZIPs
+  - Nearby towns (5–10 miles)
+  - Local directories, schools, hospitals, chambers, associations
 
-For QUICK LOOKUP (PATH B):
-Skip sections 1 and 2. ONLY return the markdown table under:
+Broaden logic:
+- If initial narrowing yields fewer than 15 COIs:
+  - Automatically broaden geography and categories
+- Only deliver fewer than 10 if:
+  - You broadened at least twice AND
+  - You clearly say: “Limited results after broadening. Here’s what I found.”
+
+Contact info (if you include it in “Organization / Link”):
+- Only public business websites or public LinkedIn pages
+- No personal phone numbers
+- No personal emails
+
+After the table, ALWAYS ask:
+
+> **Would you like more COIs?**
+> I can add more (up to 125 total), or we can finish with your summary.
+
+If the user wants more:
+- In this Streamlit version, just say something like:
+  “In this demo, I generate only the first batch. In a full version, I would continue up to 125 COIs.”
+
+-------------------------
+PATH B — QUICK COI LOOKUP
+-------------------------
+
+For the quick lookup (Path B), you skip the full Intelligence Report and Themes.
+Instead, you ONLY output:
 
 ### COI List – First Batch (20–25 COIs)
-with the same columns as above.
+
+In the SAME markdown table format:
+
+| Name | Role/Specialty | Organization / Link | Why They Fit |
+
+You still:
+- Use web_search
+- Focus on the advisor’s ZIP and optional COI type hint
+- Broaden when needed to 20–25 COIs
+- Follow the same compliance and public-info rules
+
+-------------------------
+COMPLIANCE & FINAL NOTES
+-------------------------
+
+- Only use public business contact info (websites, LinkedIn, office phone).
+- No personal cell numbers or personal emails.
+- No product, tax, legal, investment, or market advice.
+- Encourage advisors to independently verify every COI.
+- Use the advisor’s community info ONLY if they provided it.
+
+Always keep responses structured, warm, and concise.
 """
+
+# ---------- HELPER FUNCTIONS TO CALL THE MODEL WITH WEB SEARCH ----------
 
 def call_coi_model_full(advisor_inputs: dict) -> str:
     """
-    Call the model for the full Path A workflow:
-    Intelligence Report + Opportunity Themes + COI List (20–25 rows).
-    Returns markdown text.
+    Path A:
+    - Intelligence Report
+    - Opportunity Themes
+    - COI List (20–25 rows)
+    Uses gpt-5.1 + web_search.
     """
     user_prompt = f"""
 Advisor inputs:
@@ -76,23 +196,32 @@ Advisor inputs:
 - Warm networks: {advisor_inputs.get('networks')}
 
 Using the structure described in the SYSTEM PROMPT, generate:
+
 1) COI Intelligence Report
 2) COI Opportunity Themes
 3) COI List – First Batch (20–25 COIs) as a markdown table.
 """
-    response = client.responses.create(
-        model="gpt-5.1",
-        input=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_prompt},
-        ],
-    )
-    return response.output_text
+
+    try:
+        response = client.responses.create(
+            model="gpt-5.1",
+            tools=[{"type": "web_search"}],
+            tool_choice="auto",
+            input=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+        )
+        return response.output_text
+    except Exception as e:
+        return f"**Error calling OpenAI (Path A):** `{e}`"
+
 
 def call_coi_model_quick(zip_code: str, coi_type_hint: str, extra_context: str) -> str:
     """
-    Call the model for the quick lookup (Path B) to ONLY output a table
-    of 20–25 COIs.
+    Path B:
+    Quick COI lookup, only returns the COI table (20–25 rows).
+    Uses gpt-5.1 + web_search.
     """
     user_prompt = f"""
 Quick COI lookup.
@@ -108,16 +237,25 @@ ONLY output:
 as a markdown table with:
 | Name | Role/Specialty | Organization / Link | Why They Fit |
 
+If possible, generate between 20 and 25 rows. Never fewer than 20 unless web results remain limited even after broadening.
+
+Extra context from advisor:
 {extra_context}
 """
-    response = client.responses.create(
-        model="gpt-5.1",
-        input=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_prompt},
-        ],
-    )
-    return response.output_text
+
+    try:
+        response = client.responses.create(
+            model="gpt-5.1",
+            tools=[{"type": "web_search"}],
+            tool_choice="auto",
+            input=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+        )
+        return response.output_text
+    except Exception as e:
+        return f"**Error calling OpenAI (Path B):** `{e}`"
 
 # ---------- UI: MODE SWITCH ----------
 mode = st.sidebar.radio(
@@ -187,7 +325,7 @@ if mode.startswith("Personalized"):
             "networks": networks or "None specified",
         }
 
-        with st.spinner("Calling COI model..."):
+        with st.spinner("Calling COI model with web search..."):
             result_markdown = call_coi_model_full(advisor_inputs)
 
         st.subheader("Model Output")
@@ -214,9 +352,9 @@ else:
     )
 
     if st.button("Find COIs Now"):
-        coi_hint = coi_type if coi_type != "Any" else "Any COIs that match affluent and family markets."
+        coi_hint = coi_type if coi_type != "Any" else "Any COIs that match my core market."
 
-        with st.spinner("Calling COI model..."):
+        with st.spinner("Calling COI model with web search..."):
             result_markdown_b = call_coi_model_quick(
                 zip_code=zip_code_b,
                 coi_type_hint=coi_hint,
