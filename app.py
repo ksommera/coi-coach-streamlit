@@ -373,46 +373,105 @@ if path_choice.startswith("1️⃣"):
     st.header("Path A – Personalized COI Strategy with COI List")
 
     with st.form("coi_strategy_form"):
+        # Q1
         st.markdown(
             "### Q1/6 – What is your main ZIP code?\n"
             "This anchors your COI search to a primary market. We’ll automatically consider nearby areas."
         )
         zip_code_a = st.text_input("Main ZIP code", value="07302")
 
+        # Q2 – helper table + free text
         st.markdown(
-            "### Q2/6 – Which target segments fit your clients’ market?\n"
-            "This helps match your clients’ life stage and income to the right COIs."
-        )
-        segments = st.multiselect(
-            "Select your key segments:",
-            [
-                "Young Childfree",
-                "Young Families",
-                "Mid-Career Families",
-                "Affluent Mid-Career Families",
-                "Affluent Pre-Retirees",
-                "Affluent Retirees",
-            ],
-            default=["Affluent Mid-Career Families"],
+            "### Q2/6 — Which target segments fit your clients’ market?\n"
+            "This helps identify **who you naturally attract.**\n"
+            "Each segment points us toward **different COI types** (CPAs, realtors, attorneys, etc.)."
         )
 
         st.markdown(
-            "### Q3/6 – Which life events are most common in your clients’ lives?\n"
-            "Life events signal when clients need the most help and which COIs they work with."
-        )
-        life_events = st.multiselect(
-            "Select common life events:",
-            [
-                "New baby",
-                "Home purchase / move",
-                "Job change / stock compensation",
-                "Kids’ education decisions",
-                "Cash-flow / tax changes",
-                "Immigration / relocation",
-            ],
-            default=["Home purchase / move", "Job change / stock compensation"],
+            """
+| Segment                      | Age Range | Typical Needs                                |
+|-----------------------------|-----------|----------------------------------------------|
+| Young Childfree             | 24–44     | New job, recently engaged or married         |
+| Young Families              | 25–44     | New baby, new house, job change              |
+| Mid-Career Families         | 35–54     | Job changes, loss, caregiving, kids’ education |
+| Affluent Mid-Career Families| 35–54     | Job changes, new home purchase               |
+| Affluent Pre-Retirees       | 55+       | Approaching retirement, reviewing finances   |
+| Affluent Retirees           | 65+       | In retirement, updating plans                |
+
+You can also add **niche segments** (e.g., tech professionals, expats, small business owners, teachers, medical professionals).
+
+👉 **Reply with the segment(s) that best fit your clients, plus any niche focus you want me to factor in.**
+"""
         )
 
+        segments_text = st.text_area(
+            "Write your key segments here:",
+            placeholder="Example: Affluent Mid-Career Families and Pre-Retirees, plus French expats in Jersey City.",
+        )
+
+        # Q3 – examples based on Q2 + free text
+        st.markdown(
+            "### Q3/6 — What life events or financial triggers show up most for your clients?\n"
+            "This identifies **why** clients come to you, which then shapes the COI categories we prioritize."
+        )
+
+        segments_lower = (segments_text or "").lower()
+        suggested_events = []
+
+        if any(s in segments_lower for s in ["pre-retiree", "pre retiree", "retiree"]):
+            suggested_events.extend(
+                [
+                    "Approaching retirement",
+                    "Downsizing / relocating",
+                    "Large tax concerns",
+                    "Inheritance or sudden wealth",
+                ]
+            )
+
+        if any(s in segments_lower for s in ["mid-career", "mid career", "young families", "families"]):
+            suggested_events.extend(
+                [
+                    "Home purchase / move",
+                    "Job change / stock compensation",
+                    "Kids’ education decisions",
+                    "Cash-flow / tax changes",
+                ]
+            )
+
+        if any(s in segments_lower for s in ["expat", "immigr", "relocat"]):
+            suggested_events.extend(
+                [
+                    "Immigration / relocation",
+                    "Cross-border tax questions",
+                ]
+            )
+
+        if not suggested_events:
+            suggested_events = [
+                "Approaching retirement",
+                "Sale of a business",
+                "Downsizing / relocating",
+                "Inheritance or sudden wealth",
+                "Executive comp / stock decisions",
+                "Caring for aging parents",
+                "Divorce later in life",
+                "Large tax concerns",
+            ]
+
+        st.markdown("**Examples include:**")
+        st.markdown("\n".join([f"- {e}" for e in suggested_events]))
+
+        st.markdown(
+            "\n👉 **Which triggers apply most to your clients?** "
+            "List the top life events or triggers you see."
+        )
+
+        life_events_text = st.text_area(
+            "Write your key life events / triggers here:",
+            placeholder="Example: Home purchase or move, job change with stock, immigration, large tax bills.",
+        )
+
+        # Q4
         st.markdown(
             "### Q4/6 – Are there communities or affinity groups you work closely with?\n"
             "Communities and cultural markets create warm, trust-based introductions."
@@ -422,6 +481,7 @@ if path_choice.startswith("1️⃣"):
             placeholder="e.g., French expats, tech professionals, teachers, small business owners...",
         )
 
+        # Q5
         st.markdown(
             "### Q5/6 – What is your past professional background?\n"
             "Your prior roles and industries create natural COI overlap."
@@ -431,6 +491,7 @@ if path_choice.startswith("1️⃣"):
             placeholder="e.g., Former auditor at Deloitte, strong CPA and controller network...",
         )
 
+        # Q6
         st.markdown(
             "### Q6/6 – What warm networks do you already have?\n"
             "These are the easiest, warmest paths to COI relationships."
@@ -445,8 +506,8 @@ if path_choice.startswith("1️⃣"):
     if submitted:
         advisor_inputs = {
             "zip": zip_code_a,
-            "segments": ", ".join(segments) if segments else "None specified",
-            "life_events": ", ".join(life_events) if life_events else "None specified",
+            "segments": segments_text or "None specified",
+            "life_events": life_events_text or "None specified",
             "communities": communities or "None specified",
             "background": background or "None specified",
             "networks": networks or "None specified",
