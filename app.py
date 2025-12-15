@@ -100,11 +100,11 @@ textarea, input, select {
 
 /* Question blocks & separators */
 .qblock {
-    padding: 10px 12px;
+    padding: 14px 14px;
     background-color: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 .qblock-title {
     font-weight: 600;
@@ -116,7 +116,7 @@ textarea, input, select {
 }
 .qsep {
     border-bottom: 1px solid #d1d5db;
-    margin: 12px 0;
+    margin: 20px 0;
 }
 
 /* Tables */
@@ -371,10 +371,6 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_background, q6_networks) -> str:
-    """
-    Path A — Personalized COI Strategy with COI List.
-    Logic mirrors your GPT: Intelligence Report + first COI batch in one response.
-    """
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {
@@ -415,10 +411,6 @@ def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_backgrou
 
 
 def run_path_b_model(zip_code, coi_type, extra_context) -> str:
-    """
-    Path B — Quick COI Lookup.
-    Logic mirrors your GPT: first COI batch only (20–25), no Intelligence Report.
-    """
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {
@@ -459,10 +451,8 @@ def run_path_b_model(zip_code, coi_type, extra_context) -> str:
 
 if "selected_path" not in st.session_state:
     st.session_state.selected_path = None
-
 if "path_a_result" not in st.session_state:
     st.session_state.path_a_result = None
-
 if "path_b_result" not in st.session_state:
     st.session_state.path_b_result = None
 
@@ -704,7 +694,7 @@ if st.session_state.selected_path == "A":
         st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================================
-# PATH B UI (FULL WIDTH, LIGHTLY SEPARATED)
+# PATH B UI (FULL WIDTH)
 # =========================================
 
 elif st.session_state.selected_path == "B":
