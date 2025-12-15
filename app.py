@@ -338,7 +338,7 @@ Follow the COI System Rules strictly for Path B:
 
 
 # =========================
-# UI – PATH SELECTION
+# UI – PATH SELECTION BUTTONS
 # =========================
 
 st.markdown(
@@ -347,29 +347,38 @@ st.markdown(
 
 I can help you find Centers of Influence (COIs) in your area and, if you’d like, build a tailored COI strategy based on your market and clients.
 
-| Option | Description |
-|--------|-------------|
-| **1️⃣ Personalized COI Strategy with COI List** | A guided 3–5 minute questionnaire that builds a COI Intelligence Report and finds real COIs in your area. |
-| **2️⃣ Quick COI Lookup** | Tell me your ZIP code and the COI type you're looking for (CPA, attorney, realtor, etc.), and I’ll search immediately. |
-
-*Disclaimer: This tool uses live web search and is not exhaustive. Verify all COIs independently and follow New York Life compliance.*  
-*Resources:* COI Guide, Memory Jogger, Practice Development Team.
+*Choose how you’d like to begin:*
 """
 )
 
-path_choice = st.radio(
-    "Select your path:",
-    options=[
-        "1️⃣ Personalized COI Strategy with COI List",
-        "2️⃣ Quick COI Lookup",
-    ],
-    index=0,
-)
+# Keep track of chosen path in session_state
+if "selected_path" not in st.session_state:
+    st.session_state.selected_path = None
+
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("1️⃣ Personalized COI Strategy with COI List", use_container_width=True):
+        st.session_state.selected_path = "A"
+with col2:
+    if st.button("2️⃣ Quick COI Lookup", use_container_width=True):
+        st.session_state.selected_path = "B"
+
+st.write("")  # a bit of vertical space
+
+if st.session_state.selected_path is None:
+    st.info("Select a path above to get started.")
+else:
+    if st.session_state.selected_path == "A":
+        st.success("You selected: 1️⃣ Personalized COI Strategy with COI List")
+    else:
+        st.success("You selected: 2️⃣ Quick COI Lookup")
+
+st.divider()
 
 # =========================
 # PATH A – FULL STRATEGY
 # =========================
-if path_choice.startswith("1️⃣"):
+if st.session_state.selected_path == "A":
     st.header("Path A – Personalized COI Strategy with COI List")
 
     with st.form("coi_strategy_form"):
@@ -379,6 +388,8 @@ if path_choice.startswith("1️⃣"):
             "This anchors your COI search to a primary market. We’ll automatically consider nearby areas."
         )
         zip_code_a = st.text_input("Main ZIP code", value="07302")
+
+        st.divider()
 
         # Q2 – helper table + free text
         st.markdown(
@@ -408,6 +419,8 @@ You can also add **niche segments** (e.g., tech professionals, expats, small bus
             "Write your key segments here:",
             placeholder="Example: Affluent Mid-Career Families and Pre-Retirees, plus French expats in Jersey City.",
         )
+
+        st.divider()
 
         # Q3 – examples based on Q2 + free text
         st.markdown(
@@ -471,6 +484,8 @@ You can also add **niche segments** (e.g., tech professionals, expats, small bus
             placeholder="Example: Home purchase or move, job change with stock, immigration, large tax bills.",
         )
 
+        st.divider()
+
         # Q4
         st.markdown(
             "### Q4/6 – Are there communities or affinity groups you work closely with?\n"
@@ -480,6 +495,8 @@ You can also add **niche segments** (e.g., tech professionals, expats, small bus
             "Communities / affinity groups",
             placeholder="e.g., French expats, tech professionals, teachers, small business owners...",
         )
+
+        st.divider()
 
         # Q5
         st.markdown(
@@ -491,6 +508,8 @@ You can also add **niche segments** (e.g., tech professionals, expats, small bus
             placeholder="e.g., Former auditor at Deloitte, strong CPA and controller network...",
         )
 
+        st.divider()
+
         # Q6
         st.markdown(
             "### Q6/6 – What warm networks do you already have?\n"
@@ -500,6 +519,8 @@ You can also add **niche segments** (e.g., tech professionals, expats, small bus
             "Warm networks you already have",
             placeholder="e.g., alumni, former colleagues, parent groups, chamber of commerce...",
         )
+
+        st.divider()
 
         submitted = st.form_submit_button("Generate Intelligence Report & First COI Batch")
 
@@ -522,7 +543,7 @@ You can also add **niche segments** (e.g., tech professionals, expats, small bus
 # =========================
 # PATH B – QUICK LOOKUP
 # =========================
-else:
+elif st.session_state.selected_path == "B":
     st.header("Path B – Quick COI Lookup")
 
     col1, col2 = st.columns(2)
@@ -543,6 +564,8 @@ else:
                 "School / Education",
             ],
         )
+
+    st.divider()
 
     extra_context = st.text_area(
         "Optional extra context for the search",
