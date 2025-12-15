@@ -30,7 +30,7 @@ CUSTOM_CSS = """
     margin-bottom: 0.8rem;
 }
 
-/* Softer card (for side info) */
+/* Softer card (for side info, if needed) */
 .card-soft {
     background-color: #ffffff;
     border-radius: 10px;
@@ -637,20 +637,6 @@ if st.session_state.selected_path == "A":
 
     with right:
         st.markdown("#### Path A Output")
-        st.markdown(
-            """
-            <div class="card-soft">
-              <div style="font-size:0.9rem; color:#4b5563;">
-                Once you click the button, the COI Coach will:
-                <br><br>
-                • Summarize your focus in a COI Intelligence Report.<br>
-                • Run live web search.<br>
-                • Return 20–25 real COIs in a table with public business contact only.
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
         if st.session_state.path_a_result:
             st.markdown('<div class="result-card">', unsafe_allow_html=True)
@@ -707,20 +693,6 @@ elif st.session_state.selected_path == "B":
 
     with right:
         st.markdown("#### Path B Output")
-        st.markdown(
-            """
-            <div class="card-soft">
-              <div style="font-size:0.9rem; color:#4b5563;">
-                Path B skips the Intelligence Report and goes straight to:
-                <br><br>
-                • 20–25 COIs in your chosen category.<br>
-                • Centered on your ZIP (with broadening when needed).<br>
-                • Public business contact information only.
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
         if st.session_state.path_b_result:
             st.markdown('<div class="result-card">', unsafe_allow_html=True)
@@ -733,16 +705,5 @@ elif st.session_state.selected_path == "B":
 # =========================================
 
 else:
-    st.markdown(
-        """
-        <div class="card-soft">
-          <div style="font-weight:600; margin-bottom:0.3rem;">Start by choosing a path</div>
-          <div style="font-size:0.9rem; color:#4b5563;">
-            • Path 1 builds a simple COI strategy and your first COI list.<br>
-            • Path 2 jumps straight to a COI list based on ZIP and COI type.<br><br>
-            Click one of the buttons above to begin.
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # Minimal idle text, no extra box
+    st.write("Choose **Path 1** or **Path 2** above to get started.")
