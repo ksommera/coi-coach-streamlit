@@ -3,7 +3,7 @@ import streamlit as st
 from openai import OpenAI
 
 # =========================================
-# CONFIG
+# STREAMLIT CONFIG
 # =========================================
 
 st.set_page_config(
@@ -12,97 +12,111 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- DARK THEME + CARD STYLES ---
+# --- LIGHT, SIMPLE NYL-STYLE ---
 CUSTOM_CSS = """
 <style>
-/* Global */
-body, .stApp {
-    background-color: #050611;
-    color: #f5f5f7;
+/* Light background */
+.stApp {
+    background-color: #f5f7fb;
 }
 
-/* Main containers */
+/* Generic card */
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    margin-bottom: 0.8rem;
+}
+
+/* Softer card */
+.card-soft {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 0.8rem;
+}
+
+/* Titles */
 .main-title {
-    font-size: 1.9rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
+    color: #111827;
 }
 .sub-title {
     font-size: 0.95rem;
-    opacity: 0.8;
-}
-
-/* Cards */
-.card {
-    border-radius: 16px;
-    padding: 1.2rem 1.4rem;
-    margin-bottom: 1.0rem;
-    background: radial-gradient(circle at top left, #1c2333 0, #050611 55%);
-    border: 1px solid rgba(255,255,255,0.06);
-}
-.card-soft {
-    border-radius: 14px;
-    padding: 1rem 1.1rem;
-    margin-bottom: 0.75rem;
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(148, 163, 184, 0.3);
-}
-.card-header {
-    font-weight: 600;
-    font-size: 1.0rem;
-    margin-bottom: 0.35rem;
+    color: #4b5563;
 }
 .small-label {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #a5b4fc;
-    margin-bottom: 0.15rem;
+    color: #6b7280;
+    margin-bottom: 0.2rem;
+}
+
+/* Section divider */
+.section-divider {
+    margin: 0.6rem 0 0.8rem 0;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 /* Buttons */
 .stButton > button {
     border-radius: 999px !important;
-    padding: 0.6rem 1.4rem !important;
-    border: 1px solid rgba(148,163,184,0.7) !important;
-    background: linear-gradient(135deg, #1d4ed8, #4f46e5) !important;
-    color: #f9fafb !important;
+    padding: 0.45rem 1.2rem !important;
+    border: 1px solid #0050b3 !important;
+    background-color: #0050b3 !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
+    font-size: 0.95rem !important;
 }
 .stButton > button:hover {
-    filter: brightness(1.08);
+    background-color: #003a82 !important;
+    border-color: #003a82 !important;
 }
 
-/* Path selector buttons */
-.path-button {
-    width: 100%;
-    text-align: left;
-}
-.path-pill {
-    font-size: 0.8rem;
-    opacity: 0.8;
-}
-
-/* Inputs tweaks */
-textarea, input, select {
-    border-radius: 10px !important;
-}
-
-/* Results area */
+/* Results card */
 .result-card {
-    border-radius: 16px;
-    padding: 1.0rem 1.2rem;
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(148, 163, 184, 0.3);
+    background-color: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: 0.9rem 1.1rem;
+    margin-top: 0.6rem;
 }
 .result-title {
     font-weight: 600;
-    font-size: 1.0rem;
+    font-size: 1rem;
     margin-bottom: 0.4rem;
 }
-.section-divider {
-    margin: 0.9rem 0;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+
+/* Inputs */
+textarea, input, select {
+    border-radius: 6px !important;
+}
+
+/* Question blocks & separators */
+.qblock {
+    padding: 14px 14px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.qblock-title {
+    font-weight: 600;
+    color: #111827;
+}
+.qblock-help {
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+.qsep {
+    border-bottom: 1px solid #d1d5db;
+    margin: 20px 0;
 }
 
 /* Tables */
@@ -115,7 +129,7 @@ table {
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # =========================================
-# SYSTEM PROMPT (DO NOT CHANGE)
+# SYSTEM PROMPT (KEEP AS-IS)
 # =========================================
 
 SYSTEM_PROMPT = r"""
@@ -351,25 +365,12 @@ END OF SYSTEM RULES (HYBRID PROMPT).
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-
 # =========================================
-# MODEL-CALL WRAPPERS
+# MODEL-CALL WRAPPERS (LOGIC PRESERVED)
 # =========================================
-# IMPORTANT:
-# Paste your EXISTING model calls inside these functions
-# WITHOUT changing the logic, prompt wording, tools, or model.
 
 
 def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_background, q6_networks) -> str:
-    """
-    Wrapper for your EXISTING Path A OpenAI call.
-    Paste your current implementation between the markers.
-    It must return a markdown string with:
-      - Intelligence Report
-      - COI list table (20–25)
-      - 'Would you like more COIs?' line
-    """
-    # >>> BEGIN ORIGINAL PATH A IMPLEMENTATION (KEEP LOGIC IDENTICAL) <<<
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {
@@ -402,24 +403,14 @@ def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_backgrou
         max_output_tokens=2000,
     )
 
-    # Extract text (adjust if your existing code uses a different access pattern)
     content_parts = []
     for item in response.output[0].content:
         if item.type == "output_text":
             content_parts.append(item.text)
     return "\n".join(content_parts)
-    # >>> END ORIGINAL PATH A IMPLEMENTATION <<<
 
 
 def run_path_b_model(zip_code, coi_type, extra_context) -> str:
-    """
-    Wrapper for your EXISTING Path B OpenAI call.
-    Paste your current implementation between the markers.
-    It must return a markdown string with:
-      - COI list (20–25)
-      - 'Would you like more COIs?' line
-    """
-    # >>> BEGIN ORIGINAL PATH B IMPLEMENTATION (KEEP LOGIC IDENTICAL) <<<
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {
@@ -452,7 +443,6 @@ def run_path_b_model(zip_code, coi_type, extra_context) -> str:
         if item.type == "output_text":
             content_parts.append(item.text)
     return "\n".join(content_parts)
-    # >>> END ORIGINAL PATH B IMPLEMENTATION <<<
 
 
 # =========================================
@@ -461,13 +451,10 @@ def run_path_b_model(zip_code, coi_type, extra_context) -> str:
 
 if "selected_path" not in st.session_state:
     st.session_state.selected_path = None
-
 if "path_a_result" not in st.session_state:
     st.session_state.path_a_result = None
-
 if "path_b_result" not in st.session_state:
     st.session_state.path_b_result = None
-
 
 # =========================================
 # HEADER
@@ -482,7 +469,7 @@ with header_col1:
           <div class="small-label">New York Life • COI Coach</div>
           <div class="main-title">Centers of Influence Coach</div>
           <div class="sub-title">
-            Find real Centers of Influence in your area and build a simple, tailored COI strategy.
+            A simple helper to find real COIs in your area and build a focused COI strategy.
           </div>
         </div>
         """,
@@ -493,14 +480,14 @@ with header_col2:
     st.markdown(
         """
         <div class="card-soft">
-          <div class="card-header">How this demo works</div>
-          <ul style="margin-left: -1rem; font-size: 0.86rem; opacity:0.9;">
-            <li>Choose a path below.</li>
-            <li>Answer a few short questions.</li>
-            <li>The COI Coach runs live web search and returns real COIs.</li>
-          </ul>
-          <div style="font-size:0.78rem; opacity:0.7; margin-top:0.2rem;">
-            This is a prototype. Always verify COI details and follow NYL compliance.
+          <div style="font-weight:600; margin-bottom:0.3rem;">How this works</div>
+          <div style="font-size:0.9rem; color:#4b5563;">
+            • Choose a path below.<br>
+            • Answer a few short questions.<br>
+            • The COI Coach runs live web search and returns real COIs.<br><br>
+            <span style="font-size:0.82rem; color:#6b7280;">
+              This is a prototype. Always verify COI details and follow NYL compliance.
+            </span>
           </div>
         </div>
         """,
@@ -510,15 +497,15 @@ with header_col2:
 st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
 # =========================================
-# PATH SELECTION CARD
+# PATH SELECTION
 # =========================================
 
 st.markdown(
     """
     <div class="card">
-      <div class="card-header">Select your path</div>
-      <div style="font-size:0.9rem; opacity:0.85; margin-bottom:0.8rem;">
-        Pick one to start. The questions for your path will appear below.
+      <div style="font-weight:600; margin-bottom:0.35rem;">Select your path</div>
+      <div style="font-size:0.9rem; color:#4b5563;">
+        Pick one to start. The questions for that path will appear below.
       </div>
     </div>
     """,
@@ -534,14 +521,13 @@ with path_col1:
     st.markdown(
         """
         <div class="card-soft">
-          <div class="path-pill">Path 1 • 3–5 minutes</div>
-          <div style="font-size:0.88rem; margin-top:0.3rem;">
+          <div style="font-size:0.9rem; color:#111827;">
             Short intake (6 questions). You’ll get:
-            <ul style="margin-left:-1rem;">
-              <li>COI Intelligence Report</li>
-              <li>First batch of 20–25 real COIs</li>
-            </ul>
           </div>
+          <ul style="font-size:0.88rem; color:#4b5563; margin-top:0.2rem; padding-left:1.1rem;">
+            <li>COI Intelligence Report</li>
+            <li>First batch of 20–25 real COIs</li>
+          </ul>
         </div>
         """,
         unsafe_allow_html=True,
@@ -554,11 +540,13 @@ with path_col2:
     st.markdown(
         """
         <div class="card-soft">
-          <div class="path-pill">Path 2 • ~1 minute</div>
-          <div style="font-size:0.88rem; margin-top:0.3rem;">
-            Enter your ZIP + COI type and go straight to
-            a list of 20–25 COIs, no strategy report.
+          <div style="font-size:0.9rem; color:#111827;">
+            Enter your ZIP + COI type and go straight to a COI list.
           </div>
+          <ul style="font-size:0.88rem; color:#4b5563; margin-top:0.2rem; padding-left:1.1rem;">
+            <li>No strategy report</li>
+            <li>20–25 COIs in your chosen category</li>
+          </ul>
         </div>
         """,
         unsafe_allow_html=True,
@@ -567,213 +555,234 @@ with path_col2:
 st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
 # =========================================
-# PATH A FORM (Only if selected)
+# PATH A UI (FULL WIDTH, QUESTIONS MATCH .TXT)
 # =========================================
 
 if st.session_state.selected_path == "A":
-    left, right = st.columns([1.4, 1.1])
 
-    with left:
-        st.markdown("### 1️⃣ Path A — Personalized COI Strategy with COI List")
+    st.markdown("#### 1️⃣ Path A — Personalized COI Strategy with COI List")
 
-        with st.form("path_a_form"):
-            st.markdown("#### Intake (Q1–Q6)")
+    with st.form("path_a_form"):
+        st.markdown("### Intake (Q1–Q6)")
 
-            # Q1
-            q1_zip = st.text_input("Q1 – Main ZIP code", placeholder="e.g., 07302")
-
-            # Q2 with helper table
-            st.markdown("Q2 – Target segments")
-            st.markdown(
-                """
-                Use short labels like **Young Families**, **Mid-Career Families**, **Affluent Pre-Retirees**, or your own niches.
-                """
-            )
-            q2_segments = st.text_area(
-                "",
-                placeholder="e.g., Young Families, Affluent Mid-Career Families, French-speaking expats, small business owners",
-                height=60,
-            )
-
-            with st.expander("Reference: common NYL target segments"):
-                st.markdown(
-                    """
-                    | Segment                      | Age Range | Typical triggers and needs                                      |
-                    |-----------------------------|-----------|------------------------------------------------------------------|
-                    | Young Childfree             | 24–44     | New jobs, relationships, early career cash-flow changes         |
-                    | Young Families              | 25–44     | New babies, home purchase, childcare, education planning        |
-                    | Mid-Career Families         | 35–54     | Job changes, caring for parents, children’s education decisions |
-                    | Affluent Mid-Career Families| 35–54     | Higher income, stock comp, new homes, complex tax situations    |
-                    | Affluent Pre-Retirees       | 55+       | Retirement readiness, downsizing, income planning               |
-                    | Affluent Retirees           | 65+       | Income stability, healthcare, estate planning                   |
-                    """,
-                    help="Internal NYL segmentation reference.",
-                )
-
-            # Q3
-            st.markdown("Q3 – Common life events")
-            helper_text = "Examples: new baby, home purchase, job change, stock comp, immigration, kids’ education decisions."
-            if q2_segments:
-                helper_text += " Tailor this to the segments you listed above."
-            q3_events = st.text_area(
-                "",
-                placeholder="e.g., New baby, relocation, new job with RSUs, daycare/private school decisions",
-                help=helper_text,
-                height=60,
-            )
-
-            # Q4
-            q4_communities = st.text_area(
-                "Q4 – Communities / affinity groups",
-                placeholder="e.g., French expat community, faith community, local parent groups, LGBTQ+, veterans",
-                height=60,
-            )
-
-            # Q5
-            q5_background = st.text_area(
-                "Q5 – Advisor background (roles, industries, firms)",
-                placeholder="e.g., Former CPA at Deloitte, corporate finance, NYC tech sales",
-                height=70,
-            )
-
-            # Q6
-            q6_networks = st.text_area(
-                "Q6 – Warm networks already available",
-                placeholder="e.g., Former colleagues, alumni network, daycare parents, chamber of commerce",
-                height=70,
-            )
-
-            st.markdown("<br>", unsafe_allow_html=True)
-
-            submit_a = st.form_submit_button("Generate Intelligence Report & First COI Batch")
-
-        if submit_a:
-            if not q1_zip:
-                st.warning("Please enter at least your main ZIP code to run Path A.")
-            else:
-                with st.spinner("Generating your Intelligence Report and first COI batch…"):
-                    result = run_path_a_model(
-                        q1_zip=q1_zip,
-                        q2_segments=q2_segments,
-                        q3_events=q3_events,
-                        q4_communities=q4_communities,
-                        q5_background=q5_background,
-                        q6_networks=q6_networks,
-                    )
-                    st.session_state.path_a_result = result
-
-    with right:
-        st.markdown("#### Path A Output")
+        # Q1/6 — What is your main ZIP code?
         st.markdown(
-            """
-            <div class="card-soft">
-              <div style="font-size:0.9rem;">
-                Once you click the button, the COI Coach will:
-                <ol style="margin-left:-0.8rem;">
-                  <li>Summarize your focus in a COI Intelligence Report.</li>
-                  <li>Run live web search.</li>
-                  <li>Return 20–25 real COIs in a table with public contact only.</li>
-                </ol>
-              </div>
-            </div>
-            """,
+            '<div class="qblock">'
+            '<div class="qblock-title">Q1/6 — What is your main ZIP code?</div>'
+            '</div>',
             unsafe_allow_html=True,
         )
+        q1_zip = st.text_input("", placeholder="e.g., 07302")
 
-        if st.session_state.path_a_result:
-            st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            st.markdown('<div class="result-title">🧠 Intelligence Report & First COI Batch</div>', unsafe_allow_html=True)
-            st.markdown(st.session_state.path_a_result)
-            st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
 
+        # Q2/6 — Which target segments fit your clients’ market?
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q2/6 — Which target segments fit your clients’ market?</div>'
+            '<div class="qblock-help">'
+            'This helps identify which types of clients you naturally attract. '
+            'You can use segments like Young Families, Mid-Career Families, Affluent Pre-Retirees, '
+            'or add your own niche segments.'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        q2_segments = st.text_area(
+            "",
+            placeholder="e.g., Young Families, Affluent Mid-Career Families, French-speaking expats, small business owners",
+            height=60,
+        )
+
+        with st.expander("Reference: common NYL target segments"):
+            st.markdown(
+                """
+                | Segment                      | Age Range | Typical triggers and needs                                      |
+                |-----------------------------|-----------|------------------------------------------------------------------|
+                | Young Childfree             | 24–44     | New jobs, relationships, early career cash-flow changes         |
+                | Young Families              | 25–44     | New babies, home purchase, childcare, education planning        |
+                | Mid-Career Families         | 35–54     | Job changes, caring for parents, children’s education decisions |
+                | Affluent Mid-Career Families| 35–54     | Higher income, stock comp, new homes, complex tax situations    |
+                | Affluent Pre-Retirees       | 55+       | Retirement readiness, downsizing, income planning               |
+                | Affluent Retirees           | 65+       | Income stability, healthcare, estate planning                   |
+                """
+            )
+
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # Q3/6 — Which life events are most common in your clients’ lives?
+        helper_text = "Examples: new baby, home purchase / move, job change, stock comp, immigration / relocation, education decisions."
+        if q2_segments:
+            helper_text += " Tailor this to the segments you listed."
+
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q3/6 — Which life events are most common in your clients’ lives?</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        q3_events = st.text_area(
+            "",
+            placeholder="e.g., New baby, relocation, new job with RSUs, daycare/private school decisions",
+            help=helper_text,
+            height=60,
+        )
+
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # Q4/6 — Are there communities or affinity groups you work closely with?
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q4/6 — Are there communities or affinity groups you work closely with?</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        q4_communities = st.text_area(
+            "",
+            placeholder="e.g., French expat community, faith community, local parent groups, LGBTQ+, veterans",
+            height=60,
+        )
+
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # Q5/6 — What is your past professional background?
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q5/6 — What is your past professional background?</div>'
+            '<div class="qblock-help">(You may include roles and company names.)</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        q5_background = st.text_area(
+            "",
+            placeholder="e.g., Former CPA at Deloitte, corporate finance, NYC tech sales",
+            height=70,
+        )
+
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # Q6/6 — What warm networks do you already have?
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q6/6 — What warm networks do you already have?</div>'
+            '<div class="qblock-help">'
+            'Examples: former colleagues, parent groups, alumni, small business owners.'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        q6_networks = st.text_area(
+            "",
+            placeholder="e.g., Former colleagues, alumni network, daycare parents, chamber of commerce",
+            height=70,
+        )
+
+        submit_a = st.form_submit_button("Generate Intelligence Report & First COI Batch")
+
+    if submit_a:
+        if not q1_zip:
+            st.warning("Please enter at least your main ZIP code to run Path A.")
+        else:
+            with st.spinner("Generating your Intelligence Report and first COI batch..."):
+                st.session_state.path_a_result = run_path_a_model(
+                    q1_zip=q1_zip,
+                    q2_segments=q2_segments,
+                    q3_events=q3_events,
+                    q4_communities=q4_communities,
+                    q5_background=q5_background,
+                    q6_networks=q6_networks,
+                )
+
+    if st.session_state.path_a_result:
+        st.markdown("#### 🧠 Intelligence Report & First COI Batch")
+        st.markdown('<div class="result-card">', unsafe_allow_html=True)
+        st.markdown(st.session_state.path_a_result)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================================
-# PATH B FORM (Only if selected)
+# PATH B UI (FULL WIDTH)
 # =========================================
 
 elif st.session_state.selected_path == "B":
-    left, right = st.columns([1.4, 1.1])
 
-    with left:
-        st.markdown("### 2️⃣ Path B — Quick COI Lookup")
+    st.markdown("#### 2️⃣ Path B — Quick COI Lookup")
 
-        with st.form("path_b_form"):
-            zip_b = st.text_input("ZIP code", placeholder="e.g., 07302")
+    with st.form("path_b_form"):
+        st.markdown("### Quick lookup inputs")
 
-            coi_type = st.selectbox(
-                "COI type",
-                [
-                    "CPA / Tax Advisor",
-                    "Estate Planning Attorney",
-                    "Immigration Attorney",
-                    "Family Law / Divorce Attorney",
-                    "Realtor",
-                    "Mortgage Lender / Broker",
-                    "Pediatrician / OB-GYN",
-                    "School / Education Professional",
-                    "Business Banker / RM",
-                    "Business Consultant / Career Coach",
-                    "Community / Cultural Organization",
-                    "Other / Mixed COIs",
-                ],
-            )
-
-            extra_context = st.text_area(
-                "Optional: extra context about your clients or focus",
-                placeholder="e.g., French-speaking expat professionals, tech employees with stock comp, small business owners",
-                height=70,
-            )
-
-            submit_b = st.form_submit_button("Find COIs Now")
-
-        if submit_b:
-            if not zip_b:
-                st.warning("Please enter a ZIP code to run Path B.")
-            else:
-                with st.spinner("Finding COIs in your area…"):
-                    result = run_path_b_model(zip_code=zip_b, coi_type=coi_type, extra_context=extra_context)
-                    st.session_state.path_b_result = result
-
-    with right:
-        st.markdown("#### Path B Output")
+        # ZIP
         st.markdown(
-            """
-            <div class="card-soft">
-              <div style="font-size:0.9rem;">
-                Path B skips the Intelligence Report and goes straight to:
-                <ul style="margin-left:-1rem;">
-                  <li>20–25 COIs in your chosen category</li>
-                  <li>All centered on your ZIP (with broadening when needed)</li>
-                  <li>Public business contact info only</li>
-                </ul>
-              </div>
-            </div>
-            """,
+            '<div class="qblock">'
+            '<div class="qblock-title">ZIP code</div>'
+            '</div>',
             unsafe_allow_html=True,
         )
+        zip_b = st.text_input("", placeholder="e.g., 07302")
 
-        if st.session_state.path_b_result:
-            st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            st.markdown('<div class="result-title">📋 COI List – First Batch</div>', unsafe_allow_html=True)
-            st.markdown(st.session_state.path_b_result)
-            st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
 
+        # COI type
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">COI type</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        coi_type = st.selectbox(
+            "",
+            [
+                "CPA / Tax Advisor",
+                "Estate Planning Attorney",
+                "Immigration Attorney",
+                "Family Law / Divorce Attorney",
+                "Realtor",
+                "Mortgage Lender / Broker",
+                "Pediatrician / OB-GYN",
+                "School / Education Professional",
+                "Business Banker / RM",
+                "Business Consultant / Career Coach",
+                "Community / Cultural Organization",
+                "Other / Mixed COIs",
+            ],
+        )
+
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # Extra context
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Optional: extra context about your clients or focus</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        extra_context = st.text_area(
+            "",
+            placeholder="e.g., French-speaking expat professionals, tech employees with stock comp, small business owners",
+            height=70,
+        )
+
+        submit_b = st.form_submit_button("Find COIs Now")
+
+    if submit_b:
+        if not zip_b:
+            st.warning("Please enter a ZIP code to run Path B.")
+        else:
+            with st.spinner("Finding COIs in your area..."):
+                st.session_state.path_b_result = run_path_b_model(
+                    zip_code=zip_b,
+                    coi_type=coi_type,
+                    extra_context=extra_context,
+                )
+
+    if st.session_state.path_b_result:
+        st.markdown("#### 📋 COI List – First Batch")
+        st.markdown('<div class="result-card">', unsafe_allow_html=True)
+        st.markdown(st.session_state.path_b_result)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================================
-# IDLE STATE MESSAGE
+# IDLE STATE (NO PATH SELECTED)
 # =========================================
 
 else:
-    st.markdown(
-        """
-        <div class="card-soft">
-          <div class="card-header">Start by choosing a path</div>
-          <div style="font-size:0.9rem; opacity:0.9;">
-            • Path 1 builds a COI strategy and your first COI list.<br>
-            • Path 2 jumps straight to a COI list based on ZIP and COI type.<br><br>
-            Click one of the buttons above to begin.
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.write("Choose **Path 1** or **Path 2** above to get started.")
