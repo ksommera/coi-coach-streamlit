@@ -98,6 +98,27 @@ textarea, input, select {
     border-radius: 6px !important;
 }
 
+/* Question blocks & separators */
+.qblock {
+    padding: 10px 12px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.qblock-title {
+    font-weight: 600;
+    color: #111827;
+}
+.qblock-help {
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+.qsep {
+    border-bottom: 1px solid #d1d5db;
+    margin: 12px 0;
+}
+
 /* Tables */
 table {
     font-size: 0.9rem;
@@ -544,7 +565,7 @@ with path_col2:
 st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
 # =========================================
-# PATH A UI (FULL WIDTH)
+# PATH A UI (FULL WIDTH, SEPARATED QUESTIONS)
 # =========================================
 
 if st.session_state.selected_path == "A":
@@ -552,19 +573,31 @@ if st.session_state.selected_path == "A":
     st.markdown("#### 1️⃣ Path A — Personalized COI Strategy with COI List")
 
     with st.form("path_a_form"):
-        st.markdown("**Intake (Q1–Q6)**")
+        st.markdown("### Intake (Q1–Q6)")
 
         # Q1
-        q1_zip = st.text_input("Q1 – Main ZIP code", placeholder="e.g., 07302")
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q1 – Main ZIP code</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        q1_zip = st.text_input("", placeholder="e.g., 07302")
+
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
 
         # Q2
-        st.markdown("**Q2 – Target segments**")
         st.markdown(
-            "Use short labels like **Young Families**, **Mid-Career Families**, "
-            "**Affluent Pre-Retirees**, or your own niches."
+            '<div class="qblock">'
+            '<div class="qblock-title">Q2 – Target segments</div>'
+            '<div class="qblock-help">'
+            'Use labels like Young Families, Mid-Career Families, Affluent Pre-Retirees, or niche groups.'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True,
         )
         q2_segments = st.text_area(
-            label="",
+            "",
             placeholder="e.g., Young Families, Affluent Mid-Career Families, French-speaking expats, small business owners",
             height=60,
         )
@@ -583,35 +616,67 @@ if st.session_state.selected_path == "A":
                 """
             )
 
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
         # Q3
-        st.markdown("**Q3 – Common life events**")
         helper_text = "Examples: new baby, home purchase, job change, stock comp, immigration, kids’ education decisions."
         if q2_segments:
-            helper_text += " Tailor this to the segments you listed above."
+            helper_text += " Tailor this to the segments you listed."
+
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q3 – Common life events</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         q3_events = st.text_area(
-            label="",
+            "",
             placeholder="e.g., New baby, relocation, new job with RSUs, daycare/private school decisions",
             help=helper_text,
             height=60,
         )
 
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
         # Q4
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q4 – Communities / affinity groups</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         q4_communities = st.text_area(
-            "Q4 – Communities / affinity groups",
+            "",
             placeholder="e.g., French expat community, faith community, local parent groups, LGBTQ+, veterans",
             height=60,
         )
 
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
         # Q5
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q5 – Advisor background (roles, industries, firms)</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         q5_background = st.text_area(
-            "Q5 – Advisor background (roles, industries, firms)",
+            "",
             placeholder="e.g., Former CPA at Deloitte, corporate finance, NYC tech sales",
             height=70,
         )
 
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
         # Q6
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q6 – Warm networks already available</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         q6_networks = st.text_area(
-            "Q6 – Warm networks already available",
+            "",
             placeholder="e.g., Former colleagues, alumni network, daycare parents, chamber of commerce",
             height=70,
         )
@@ -639,7 +704,7 @@ if st.session_state.selected_path == "A":
         st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================================
-# PATH B UI (FULL WIDTH)
+# PATH B UI (FULL WIDTH, LIGHTLY SEPARATED)
 # =========================================
 
 elif st.session_state.selected_path == "B":
@@ -647,10 +712,28 @@ elif st.session_state.selected_path == "B":
     st.markdown("#### 2️⃣ Path B — Quick COI Lookup")
 
     with st.form("path_b_form"):
-        zip_b = st.text_input("ZIP code", placeholder="e.g., 07302")
+        st.markdown("### Quick lookup inputs")
 
+        # ZIP
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">ZIP code</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        zip_b = st.text_input("", placeholder="e.g., 07302")
+
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # COI type
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">COI type</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         coi_type = st.selectbox(
-            "COI type",
+            "",
             [
                 "CPA / Tax Advisor",
                 "Estate Planning Attorney",
@@ -667,8 +750,17 @@ elif st.session_state.selected_path == "B":
             ],
         )
 
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # Extra context
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Optional: extra context about your clients or focus</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         extra_context = st.text_area(
-            "Optional: extra context about your clients or focus",
+            "",
             placeholder="e.g., French-speaking expat professionals, tech employees with stock comp, small business owners",
             height=70,
         )
