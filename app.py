@@ -30,7 +30,7 @@ CUSTOM_CSS = """
     margin-bottom: 0.8rem;
 }
 
-/* Softer card (for side info, if needed) */
+/* Softer card */
 .card-soft {
     background-color: #ffffff;
     border-radius: 10px;
@@ -85,7 +85,7 @@ CUSTOM_CSS = """
     border-radius: 10px;
     border: 1px solid #e5e7eb;
     padding: 0.9rem 1.1rem;
-    margin-top: 0.4rem;
+    margin-top: 0.6rem;
 }
 .result-title {
     font-weight: 600;
@@ -544,166 +544,157 @@ with path_col2:
 st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
 # =========================================
-# PATH A UI
+# PATH A UI (FULL WIDTH)
 # =========================================
 
 if st.session_state.selected_path == "A":
-    left, right = st.columns([1.4, 1.1])
 
-    with left:
-        st.markdown("#### 1️⃣ Path A — Personalized COI Strategy with COI List")
+    st.markdown("#### 1️⃣ Path A — Personalized COI Strategy with COI List")
 
-        with st.form("path_a_form"):
-            st.markdown("**Intake (Q1–Q6)**")
+    with st.form("path_a_form"):
+        st.markdown("**Intake (Q1–Q6)**")
 
-            # Q1
-            q1_zip = st.text_input("Q1 – Main ZIP code", placeholder="e.g., 07302")
+        # Q1
+        q1_zip = st.text_input("Q1 – Main ZIP code", placeholder="e.g., 07302")
 
-            # Q2
-            st.markdown("**Q2 – Target segments**")
+        # Q2
+        st.markdown("**Q2 – Target segments**")
+        st.markdown(
+            "Use short labels like **Young Families**, **Mid-Career Families**, "
+            "**Affluent Pre-Retirees**, or your own niches."
+        )
+        q2_segments = st.text_area(
+            label="",
+            placeholder="e.g., Young Families, Affluent Mid-Career Families, French-speaking expats, small business owners",
+            height=60,
+        )
+
+        with st.expander("Reference: common NYL target segments"):
             st.markdown(
-                "Use short labels like **Young Families**, **Mid-Career Families**, "
-                "**Affluent Pre-Retirees**, or your own niches."
-            )
-            q2_segments = st.text_area(
-                label="",
-                placeholder="e.g., Young Families, Affluent Mid-Career Families, French-speaking expats, small business owners",
-                height=60,
+                """
+                | Segment                      | Age Range | Typical triggers and needs                                      |
+                |-----------------------------|-----------|------------------------------------------------------------------|
+                | Young Childfree             | 24–44     | New jobs, relationships, early career cash-flow changes         |
+                | Young Families              | 25–44     | New babies, home purchase, childcare, education planning        |
+                | Mid-Career Families         | 35–54     | Job changes, caring for parents, children’s education decisions |
+                | Affluent Mid-Career Families| 35–54     | Higher income, stock comp, new homes, complex tax situations    |
+                | Affluent Pre-Retirees       | 55+       | Retirement readiness, downsizing, income planning               |
+                | Affluent Retirees           | 65+       | Income stability, healthcare, estate planning                   |
+                """
             )
 
-            with st.expander("Reference: common NYL target segments"):
-                st.markdown(
-                    """
-                    | Segment                      | Age Range | Typical triggers and needs                                      |
-                    |-----------------------------|-----------|------------------------------------------------------------------|
-                    | Young Childfree             | 24–44     | New jobs, relationships, early career cash-flow changes         |
-                    | Young Families              | 25–44     | New babies, home purchase, childcare, education planning        |
-                    | Mid-Career Families         | 35–54     | Job changes, caring for parents, children’s education decisions |
-                    | Affluent Mid-Career Families| 35–54     | Higher income, stock comp, new homes, complex tax situations    |
-                    | Affluent Pre-Retirees       | 55+       | Retirement readiness, downsizing, income planning               |
-                    | Affluent Retirees           | 65+       | Income stability, healthcare, estate planning                   |
-                    """,
+        # Q3
+        st.markdown("**Q3 – Common life events**")
+        helper_text = "Examples: new baby, home purchase, job change, stock comp, immigration, kids’ education decisions."
+        if q2_segments:
+            helper_text += " Tailor this to the segments you listed above."
+        q3_events = st.text_area(
+            label="",
+            placeholder="e.g., New baby, relocation, new job with RSUs, daycare/private school decisions",
+            help=helper_text,
+            height=60,
+        )
+
+        # Q4
+        q4_communities = st.text_area(
+            "Q4 – Communities / affinity groups",
+            placeholder="e.g., French expat community, faith community, local parent groups, LGBTQ+, veterans",
+            height=60,
+        )
+
+        # Q5
+        q5_background = st.text_area(
+            "Q5 – Advisor background (roles, industries, firms)",
+            placeholder="e.g., Former CPA at Deloitte, corporate finance, NYC tech sales",
+            height=70,
+        )
+
+        # Q6
+        q6_networks = st.text_area(
+            "Q6 – Warm networks already available",
+            placeholder="e.g., Former colleagues, alumni network, daycare parents, chamber of commerce",
+            height=70,
+        )
+
+        submit_a = st.form_submit_button("Generate Intelligence Report & First COI Batch")
+
+    if submit_a:
+        if not q1_zip:
+            st.warning("Please enter at least your main ZIP code to run Path A.")
+        else:
+            with st.spinner("Generating your Intelligence Report and first COI batch..."):
+                st.session_state.path_a_result = run_path_a_model(
+                    q1_zip=q1_zip,
+                    q2_segments=q2_segments,
+                    q3_events=q3_events,
+                    q4_communities=q4_communities,
+                    q5_background=q5_background,
+                    q6_networks=q6_networks,
                 )
 
-            # Q3
-            st.markdown("**Q3 – Common life events**")
-            helper_text = "Examples: new baby, home purchase, job change, stock comp, immigration, kids’ education decisions."
-            if q2_segments:
-                helper_text += " Tailor this to the segments you listed above."
-            q3_events = st.text_area(
-                label="",
-                placeholder="e.g., New baby, relocation, new job with RSUs, daycare/private school decisions",
-                help=helper_text,
-                height=60,
-            )
-
-            # Q4
-            q4_communities = st.text_area(
-                "Q4 – Communities / affinity groups",
-                placeholder="e.g., French expat community, faith community, local parent groups, LGBTQ+, veterans",
-                height=60,
-            )
-
-            # Q5
-            q5_background = st.text_area(
-                "Q5 – Advisor background (roles, industries, firms)",
-                placeholder="e.g., Former CPA at Deloitte, corporate finance, NYC tech sales",
-                height=70,
-            )
-
-            # Q6
-            q6_networks = st.text_area(
-                "Q6 – Warm networks already available",
-                placeholder="e.g., Former colleagues, alumni network, daycare parents, chamber of commerce",
-                height=70,
-            )
-
-            submit_a = st.form_submit_button("Generate Intelligence Report & First COI Batch")
-
-        if submit_a:
-            if not q1_zip:
-                st.warning("Please enter at least your main ZIP code to run Path A.")
-            else:
-                with st.spinner("Generating your Intelligence Report and first COI batch..."):
-                    result = run_path_a_model(
-                        q1_zip=q1_zip,
-                        q2_segments=q2_segments,
-                        q3_events=q3_events,
-                        q4_communities=q4_communities,
-                        q5_background=q5_background,
-                        q6_networks=q6_networks,
-                    )
-                    st.session_state.path_a_result = result
-
-    with right:
-        st.markdown("#### Path A Output")
-
-        if st.session_state.path_a_result:
-            st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            st.markdown('<div class="result-title">🧠 Intelligence Report & First COI Batch</div>', unsafe_allow_html=True)
-            st.markdown(st.session_state.path_a_result)
-            st.markdown("</div>", unsafe_allow_html=True)
+    if st.session_state.path_a_result:
+        st.markdown("#### 🧠 Intelligence Report & First COI Batch")
+        st.markdown('<div class="result-card">', unsafe_allow_html=True)
+        st.markdown(st.session_state.path_a_result)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================================
-# PATH B UI
+# PATH B UI (FULL WIDTH)
 # =========================================
 
 elif st.session_state.selected_path == "B":
-    left, right = st.columns([1.4, 1.1])
 
-    with left:
-        st.markdown("#### 2️⃣ Path B — Quick COI Lookup")
+    st.markdown("#### 2️⃣ Path B — Quick COI Lookup")
 
-        with st.form("path_b_form"):
-            zip_b = st.text_input("ZIP code", placeholder="e.g., 07302")
+    with st.form("path_b_form"):
+        zip_b = st.text_input("ZIP code", placeholder="e.g., 07302")
 
-            coi_type = st.selectbox(
-                "COI type",
-                [
-                    "CPA / Tax Advisor",
-                    "Estate Planning Attorney",
-                    "Immigration Attorney",
-                    "Family Law / Divorce Attorney",
-                    "Realtor",
-                    "Mortgage Lender / Broker",
-                    "Pediatrician / OB-GYN",
-                    "School / Education Professional",
-                    "Business Banker / RM",
-                    "Business Consultant / Career Coach",
-                    "Community / Cultural Organization",
-                    "Other / Mixed COIs",
-                ],
-            )
+        coi_type = st.selectbox(
+            "COI type",
+            [
+                "CPA / Tax Advisor",
+                "Estate Planning Attorney",
+                "Immigration Attorney",
+                "Family Law / Divorce Attorney",
+                "Realtor",
+                "Mortgage Lender / Broker",
+                "Pediatrician / OB-GYN",
+                "School / Education Professional",
+                "Business Banker / RM",
+                "Business Consultant / Career Coach",
+                "Community / Cultural Organization",
+                "Other / Mixed COIs",
+            ],
+        )
 
-            extra_context = st.text_area(
-                "Optional: extra context about your clients or focus",
-                placeholder="e.g., French-speaking expat professionals, tech employees with stock comp, small business owners",
-                height=70,
-            )
+        extra_context = st.text_area(
+            "Optional: extra context about your clients or focus",
+            placeholder="e.g., French-speaking expat professionals, tech employees with stock comp, small business owners",
+            height=70,
+        )
 
-            submit_b = st.form_submit_button("Find COIs Now")
+        submit_b = st.form_submit_button("Find COIs Now")
 
-        if submit_b:
-            if not zip_b:
-                st.warning("Please enter a ZIP code to run Path B.")
-            else:
-                with st.spinner("Finding COIs in your area..."):
-                    result = run_path_b_model(zip_code=zip_b, coi_type=coi_type, extra_context=extra_context)
-                    st.session_state.path_b_result = result
+    if submit_b:
+        if not zip_b:
+            st.warning("Please enter a ZIP code to run Path B.")
+        else:
+            with st.spinner("Finding COIs in your area..."):
+                st.session_state.path_b_result = run_path_b_model(
+                    zip_code=zip_b,
+                    coi_type=coi_type,
+                    extra_context=extra_context,
+                )
 
-    with right:
-        st.markdown("#### Path B Output")
-
-        if st.session_state.path_b_result:
-            st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            st.markdown('<div class="result-title">📋 COI List – First Batch</div>', unsafe_allow_html=True)
-            st.markdown(st.session_state.path_b_result)
-            st.markdown("</div>", unsafe_allow_html=True)
+    if st.session_state.path_b_result:
+        st.markdown("#### 📋 COI List – First Batch")
+        st.markdown('<div class="result-card">', unsafe_allow_html=True)
+        st.markdown(st.session_state.path_b_result)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================================
 # IDLE STATE (NO PATH SELECTED)
 # =========================================
 
 else:
-    # Minimal idle text, no extra box
     st.write("Choose **Path 1** or **Path 2** above to get started.")
