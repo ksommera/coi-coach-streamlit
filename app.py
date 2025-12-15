@@ -317,5 +317,186 @@ Follow the COI System Rules strictly for Path B:
 
 1) Skip the Intelligence Report and themes.
 2) ONLY output the COI List – First Batch (20–25 COIs) as a markdown table with the required columns.
-3) Use live web search and broadening logic to hit 20–25 rows when
+3) Use live web search and broadening logic to hit 20–25 rows when possible.
+4) Ask if they want more COIs and mention the 125-name cap.
+5) Use short sentences and simple language.
 """
+
+    try:
+        response = client.responses.create(
+            model="gpt-5.1",
+            tools=[{"type": "web_search"}],
+            tool_choice="auto",
+            input=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+        )
+        return response.output_text
+    except Exception as e:
+        return f"**Error calling OpenAI (Path B):** `{e}`"
+
+
+# =========================
+# UI – PATH SELECTION
+# =========================
+
+st.markdown(
+    """
+## 👋 Welcome  
+
+I can help you find Centers of Influence (COIs) in your area and, if you’d like, build a tailored COI strategy based on your market and clients.
+
+| Option | Description |
+|--------|-------------|
+| **1️⃣ Personalized COI Strategy with COI List** | A guided 3–5 minute questionnaire that builds a COI Intelligence Report and finds real COIs in your area. |
+| **2️⃣ Quick COI Lookup** | Tell me your ZIP code and the COI type you're looking for (CPA, attorney, realtor, etc.), and I’ll search immediately. |
+
+*Disclaimer: This tool uses live web search and is not exhaustive. Verify all COIs independently and follow New York Life compliance.*  
+*Resources:* COI Guide, Memory Jogger, Practice Development Team.
+"""
+)
+
+path_choice = st.radio(
+    "Select your path:",
+    options=[
+        "1️⃣ Personalized COI Strategy with COI List",
+        "2️⃣ Quick COI Lookup",
+    ],
+    index=0,
+)
+
+# =========================
+# PATH A – FULL STRATEGY
+# =========================
+if path_choice.startswith("1️⃣"):
+    st.header("Path A – Personalized COI Strategy with COI List")
+
+    with st.form("coi_strategy_form"):
+        st.markdown(
+            "### Q1/6 – What is your main ZIP code?\n"
+            "This anchors your COI search to a primary market. We’ll automatically consider nearby areas."
+        )
+        zip_code_a = st.text_input("Main ZIP code", value="07302")
+
+        st.markdown(
+            "### Q2/6 – Which target segments fit your clients’ market?\n"
+            "This helps match your clients’ life stage and income to the right COIs."
+        )
+        segments = st.multiselect(
+            "Select your key segments:",
+            [
+                "Young Childfree",
+                "Young Families",
+                "Mid-Career Families",
+                "Affluent Mid-Career Families",
+                "Affluent Pre-Retirees",
+                "Affluent Retirees",
+            ],
+            default=["Affluent Mid-Career Families"],
+        )
+
+        st.markdown(
+            "### Q3/6 – Which life events are most common in your clients’ lives?\n"
+            "Life events signal when clients need the most help and which COIs they work with."
+        )
+        life_events = st.multiselect(
+            "Select common life events:",
+            [
+                "New baby",
+                "Home purchase / move",
+                "Job change / stock compensation",
+                "Kids’ education decisions",
+                "Cash-flow / tax changes",
+                "Immigration / relocation",
+            ],
+            default=["Home purchase / move", "Job change / stock compensation"],
+        )
+
+        st.markdown(
+            "### Q4/6 – Are there communities or affinity groups you work closely with?\n"
+            "Communities and cultural markets create warm, trust-based introductions."
+        )
+        communities = st.text_input(
+            "Communities / affinity groups",
+            placeholder="e.g., French expats, tech professionals, teachers, small business owners...",
+        )
+
+        st.markdown(
+            "### Q5/6 – What is your past professional background?\n"
+            "Your prior roles and industries create natural COI overlap."
+        )
+        background = st.text_area(
+            "Past professional background",
+            placeholder="e.g., Former auditor at Deloitte, strong CPA and controller network...",
+        )
+
+        st.markdown(
+            "### Q6/6 – What warm networks do you already have?\n"
+            "These are the easiest, warmest paths to COI relationships."
+        )
+        networks = st.text_area(
+            "Warm networks you already have",
+            placeholder="e.g., alumni, former colleagues, parent groups, chamber of commerce...",
+        )
+
+        submitted = st.form_submit_button("Generate Intelligence Report & First COI Batch")
+
+    if submitted:
+        advisor_inputs = {
+            "zip": zip_code_a,
+            "segments": ", ".join(segments) if segments else "None specified",
+            "life_events": ", ".join(life_events) if life_events else "None specified",
+            "communities": communities or "None specified",
+            "background": background or "None specified",
+            "networks": networks or "None specified",
+        }
+
+        with st.spinner("Calling COI model with web search (Path A)..."):
+            result_markdown = call_coi_model_full(advisor_inputs)
+
+        st.subheader("COI Intelligence Report + First COI Batch")
+        st.markdown(result_markdown)
+
+# =========================
+# PATH B – QUICK LOOKUP
+# =========================
+else:
+    st.header("Path B – Quick COI Lookup")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        zip_code_b = st.text_input("ZIP code", value="07302")
+    with col2:
+        coi_type = st.selectbox(
+            "COI Type (hint for the model)",
+            [
+                "Any",
+                "CPA / Tax Advisor",
+                "Attorney",
+                "Realtor",
+                "Mortgage Lender",
+                "Pediatrician",
+                "Community / Cultural Leader",
+                "Business Banker",
+                "School / Education",
+            ],
+        )
+
+    extra_context = st.text_area(
+        "Optional extra context for the search",
+        placeholder="e.g., Focus on affluent mid-career families moving into this area.",
+    )
+
+    if st.button("Find COIs Now"):
+        coi_hint = coi_type if coi_type != "Any" else "Any COIs that best match my core market."
+
+        with st.spinner("Calling COI model with web search (Path B)..."):
+            result_markdown_b = call_coi_model_quick(
+                zip_code=zip_code_b,
+                coi_type_hint=coi_hint,
+                extra_context=extra_context or "",
+            )
+
+        st.subheader("First COI Batch (20–25 COIs)")
+        st.markdown(result_markdown_b)
