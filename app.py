@@ -10,6 +10,51 @@ st.title("Centers of Influence Coach")
 st.caption("Streamlit front-end that follows your COI System Rules and GPT behavior.")
 
 # =========================
+# SIMPLE CUSTOM STYLING
+# =========================
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #020617;
+        color: #e5e7eb;
+    }
+    .coi-card {
+        padding: 1rem 1.4rem;
+        border-radius: 0.9rem;
+        border: 1px solid #1f2937;
+        background: #020617;
+        margin-bottom: 1.2rem;
+    }
+    .coi-question {
+        padding: 1.1rem 1.4rem;
+        border-radius: 0.9rem;
+        border: 1px solid #1f2937;
+        background: #020617;
+        margin-bottom: 0.6rem;
+    }
+    .stButton > button {
+        border-radius: 999px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        border: 1px solid #1f2937;
+    }
+    /* Left button = blue */
+    div[data-testid="column"]:nth-of-type(1) .stButton > button {
+        background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+        color: #f9fafb;
+    }
+    /* Right button = dark */
+    div[data-testid="column"]:nth-of-type(2) .stButton > button {
+        background: #111827;
+        color: #e5e7eb;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# =========================
 # OPENAI CLIENT
 # =========================
 api_key = st.secrets.get("OPENAI_API_KEY", None)
@@ -131,21 +176,22 @@ Write 3–5 short themes (1–3 sentences each) that connect:
 - Background
 - Networks
 
-Themes often fall into buckets:
-- Financial & tax triggers (CPAs, planners)
-- Housing & relocation (realtors, mortgage lenders, relocation specialists)
-- Family & children professionals (pediatricians, OB-GYN, schools)
-- Background & networks (business bankers, consultants, professionals tied to advisor’s prior roles)
-- Community anchors (cultural leaders, faith leaders, association heads)
-
 3) Priority COI Categories
 
 Show a short table like:
 
 | COI Category                | Why High Priority |
 |----------------------------|-------------------|
-
-Include ~8–10 categories (CPAs, realtors, attorneys, lenders, pediatricians, school roles, immigration attorneys, business bankers, career coaches, community leaders) and tailor priority based on the advisor’s data.
+| CPA / Tax Advisor          | Supports planning, relocations, and major financial decisions. |
+| Mortgage Lender / Broker   | Central during home purchases and relocations. |
+| Realtor (family/relocation)| Guides families through moves and transitions. |
+| Estate Planning Attorney   | Fits protection and long-term planning needs. |
+| Immigration Attorney       | Key for expats and relocation-based clients. |
+| Pediatrician / OB-GYN      | Trusted by expecting parents and young families. |
+| School Counselor / Principal| Connects directly with parent networks. |
+| Business Banker / RM       | Strong fit with business owners and professionals. |
+| Business Consultant / Career Coach | Supports job changes and professional transitions. |
+| Community / Cultural Leader| Trusted figure in cultural or community circles. |
 
 4) COI Opportunity Channels
 
@@ -203,7 +249,7 @@ Rules:
 - Life events
 - Communities
 - Advisor’s background
-- Advisor’s warm networks
+- Advisor’s warm networks.
 
 ASKING FOR MORE COIs
 After each batch (even if the app does not implement more yet), you MUST say:
@@ -211,11 +257,7 @@ After each batch (even if the app does not implement more yet), you MUST say:
 "**Would you like more COIs?**  
 I can add more (up to 125 total), or we can finish with your summary."
 
-If user wants more:
-- In this Streamlit version, you may simply explain that this demo only returns the first batch, but in the full workflow you would continue adding non-duplicate COIs up to 125.
-
-If user says no or you hit the cap:
-- Move to the Final Summary behavior.
+In this Streamlit version, you may explain that this demo only returns the first batch, but in the full workflow you would continue adding non-duplicate COIs up to 125.
 
 PATH B – QUICK COI LOOKUP
 For Path B:
@@ -338,40 +380,54 @@ Follow the COI System Rules strictly for Path B:
 
 
 # =========================
-# UI – PATH SELECTION BUTTONS
+# PATH SELECTION – BUTTONS
 # =========================
 
 st.markdown(
     """
-## 👋 Welcome  
+<div class="coi-card">
+  <h3 style="margin-bottom:0.4rem;">👋 Welcome</h3>
+  <p style="margin-top:0; font-size:0.95rem;">
+    I can help you find Centers of Influence (COIs) in your area and, if you’d like,
+    build a tailored COI strategy based on your market and clients.
+  </p>
 
-I can help you find Centers of Influence (COIs) in your area and, if you’d like, build a tailored COI strategy based on your market and clients.
+  <table style="width:100%; font-size:0.9rem; border-collapse:collapse; margin-top:0.4rem;">
+    <tr>
+      <th style="text-align:left; padding:0.25rem 0;">Option</th>
+      <th style="text-align:left; padding:0.25rem 0;">Description</th>
+    </tr>
+    <tr>
+      <td style="padding:0.25rem 0; vertical-align:top;"><b>1️⃣ Personalized COI Strategy with COI List</b></td>
+      <td style="padding:0.25rem 0;">A guided 3–5 minute questionnaire that builds a COI Intelligence Report and finds real COIs in your area.</td>
+    </tr>
+    <tr>
+      <td style="padding:0.25rem 0; vertical-align:top;"><b>2️⃣ Quick COI Lookup</b></td>
+      <td style="padding:0.25rem 0;">Fast COI search by ZIP and COI type (CPA, attorney, realtor, etc.).</td>
+    </tr>
+  </table>
 
-*Choose how you’d like to begin:*
-"""
+  <p style="font-size:0.8rem; margin-top:0.6rem; opacity:0.75;">
+    Disclaimer: This tool uses live web search and is not exhaustive. Verify all COIs independently and follow New York Life compliance.<br/>
+    Resources: COI Guide, Memory Jogger, Practice Development Team.
+  </p>
+</div>
+""",
+    unsafe_allow_html=True,
 )
 
-# Keep track of chosen path in session_state
 if "selected_path" not in st.session_state:
     st.session_state.selected_path = None
 
-col1, col2 = st.columns(2)
-with col1:
+st.markdown("### How would you like to start?")
+
+col_a, col_b = st.columns(2)
+with col_a:
     if st.button("1️⃣ Personalized COI Strategy with COI List", use_container_width=True):
         st.session_state.selected_path = "A"
-with col2:
+with col_b:
     if st.button("2️⃣ Quick COI Lookup", use_container_width=True):
         st.session_state.selected_path = "B"
-
-st.write("")  # a bit of vertical space
-
-if st.session_state.selected_path is None:
-    st.info("Select a path above to get started.")
-else:
-    if st.session_state.selected_path == "A":
-        st.success("You selected: 1️⃣ Personalized COI Strategy with COI List")
-    else:
-        st.success("You selected: 2️⃣ Quick COI Lookup")
 
 st.divider()
 
@@ -379,23 +435,34 @@ st.divider()
 # PATH A – FULL STRATEGY
 # =========================
 if st.session_state.selected_path == "A":
-    st.header("Path A – Personalized COI Strategy with COI List")
+    st.subheader("Path A – Personalized COI Strategy with COI List")
 
     with st.form("coi_strategy_form"):
+
         # Q1
         st.markdown(
-            "### Q1/6 – What is your main ZIP code?\n"
-            "This anchors your COI search to a primary market. We’ll automatically consider nearby areas."
+            """
+            <div class="coi-question">
+                <h4>🔷 Q1/6 – What is your main ZIP code?</h4>
+                <p>This anchors your COI search to a primary market. We’ll automatically consider nearby areas.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
         zip_code_a = st.text_input("Main ZIP code", value="07302")
 
-        st.divider()
+        st.markdown("<br/>", unsafe_allow_html=True)
 
         # Q2 – helper table + free text
         st.markdown(
-            "### Q2/6 — Which target segments fit your clients’ market?\n"
-            "This helps identify **who you naturally attract.**\n"
-            "Each segment points us toward **different COI types** (CPAs, realtors, attorneys, etc.)."
+            """
+            <div class="coi-question">
+                <h4>🔷 Q2/6 — Which target segments fit your clients’ market?</h4>
+                <p>This helps identify <b>who you naturally attract</b>. Each segment points us toward
+                different COI types (CPAs, realtors, attorneys, etc.).</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
         st.markdown(
@@ -411,21 +478,26 @@ if st.session_state.selected_path == "A":
 
 You can also add **niche segments** (e.g., tech professionals, expats, small business owners, teachers, medical professionals).
 
-👉 **Reply with the segment(s) that best fit your clients, plus any niche focus you want me to factor in.**
+👉 Write the segment(s) that best fit your clients, plus any niche focus you want me to factor in.
 """
         )
 
         segments_text = st.text_area(
-            "Write your key segments here:",
+            "Your key segments:",
             placeholder="Example: Affluent Mid-Career Families and Pre-Retirees, plus French expats in Jersey City.",
         )
 
-        st.divider()
+        st.markdown("<br/>", unsafe_allow_html=True)
 
         # Q3 – examples based on Q2 + free text
         st.markdown(
-            "### Q3/6 — What life events or financial triggers show up most for your clients?\n"
-            "This identifies **why** clients come to you, which then shapes the COI categories we prioritize."
+            """
+            <div class="coi-question">
+                <h4>🔷 Q3/6 — What life events or financial triggers show up most for your clients?</h4>
+                <p>This identifies <b>why</b> clients come to you, which shapes the COI categories we prioritize.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
         segments_lower = (segments_text or "").lower()
@@ -475,54 +547,68 @@ You can also add **niche segments** (e.g., tech professionals, expats, small bus
         st.markdown("\n".join([f"- {e}" for e in suggested_events]))
 
         st.markdown(
-            "\n👉 **Which triggers apply most to your clients?** "
-            "List the top life events or triggers you see."
+            "\n👉 Which triggers apply most to your clients? List the top life events or triggers you see."
         )
 
         life_events_text = st.text_area(
-            "Write your key life events / triggers here:",
+            "Your key life events / triggers:",
             placeholder="Example: Home purchase or move, job change with stock, immigration, large tax bills.",
         )
 
-        st.divider()
+        st.markdown("<br/>", unsafe_allow_html=True)
 
         # Q4
         st.markdown(
-            "### Q4/6 – Are there communities or affinity groups you work closely with?\n"
-            "Communities and cultural markets create warm, trust-based introductions."
+            """
+            <div class="coi-question">
+                <h4>🔷 Q4/6 – Are there communities or affinity groups you work closely with?</h4>
+                <p>Communities and cultural markets create warm, trust-based introductions.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
         communities = st.text_input(
-            "Communities / affinity groups",
+            "Communities / affinity groups:",
             placeholder="e.g., French expats, tech professionals, teachers, small business owners...",
         )
 
-        st.divider()
+        st.markdown("<br/>", unsafe_allow_html=True)
 
         # Q5
         st.markdown(
-            "### Q5/6 – What is your past professional background?\n"
-            "Your prior roles and industries create natural COI overlap."
+            """
+            <div class="coi-question">
+                <h4>🔷 Q5/6 – What is your past professional background?</h4>
+                <p>Your prior roles and industries create natural COI overlap.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
         background = st.text_area(
-            "Past professional background",
+            "Past professional background:",
             placeholder="e.g., Former auditor at Deloitte, strong CPA and controller network...",
         )
 
-        st.divider()
+        st.markdown("<br/>", unsafe_allow_html=True)
 
         # Q6
         st.markdown(
-            "### Q6/6 – What warm networks do you already have?\n"
-            "These are the easiest, warmest paths to COI relationships."
+            """
+            <div class="coi-question">
+                <h4>🔷 Q6/6 – What warm networks do you already have?</h4>
+                <p>These are the easiest, warmest paths to COI relationships.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
         networks = st.text_area(
-            "Warm networks you already have",
+            "Warm networks you already have:",
             placeholder="e.g., alumni, former colleagues, parent groups, chamber of commerce...",
         )
 
-        st.divider()
+        st.markdown("<br/>", unsafe_allow_html=True)
 
-        submitted = st.form_submit_button("Generate Intelligence Report & First COI Batch")
+        submitted = st.form_submit_button("🚀 Generate Intelligence Report & First COI Batch", use_container_width=True)
 
     if submitted:
         advisor_inputs = {
@@ -544,14 +630,20 @@ You can also add **niche segments** (e.g., tech professionals, expats, small bus
 # PATH B – QUICK LOOKUP
 # =========================
 elif st.session_state.selected_path == "B":
-    st.header("Path B – Quick COI Lookup")
+    st.subheader("Path B – Quick COI Lookup")
+
+    st.markdown(
+        "Use this when you want **fast names** in a specific area, without running the full strategy."
+    )
+
+    st.markdown("<br/>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
-        zip_code_b = st.text_input("ZIP code", value="07302")
+        zip_code_b = st.text_input("ZIP code:", value="07302")
     with col2:
         coi_type = st.selectbox(
-            "COI Type (hint for the model)",
+            "COI Type (hint for the model):",
             [
                 "Any",
                 "CPA / Tax Advisor",
@@ -565,14 +657,14 @@ elif st.session_state.selected_path == "B":
             ],
         )
 
-    st.divider()
+    st.markdown("<br/>", unsafe_allow_html=True)
 
     extra_context = st.text_area(
-        "Optional extra context for the search",
-        placeholder="e.g., Focus on affluent mid-career families moving into this area.",
+        "Optional extra context for the search:",
+        placeholder="Example: Focus on affluent mid-career families moving into this area.",
     )
 
-    if st.button("Find COIs Now"):
+    if st.button("🔍 Find COIs Now", use_container_width=True):
         coi_hint = coi_type if coi_type != "Any" else "Any COIs that best match my core market."
 
         with st.spinner("Calling COI model with web search (Path B)..."):
@@ -584,3 +676,9 @@ elif st.session_state.selected_path == "B":
 
         st.subheader("First COI Batch (20–25 COIs)")
         st.markdown(result_markdown_b)
+
+# =========================
+# NO PATH YET
+# =========================
+else:
+    st.info("Choose **Path 1** or **Path 2** above to get started.")
