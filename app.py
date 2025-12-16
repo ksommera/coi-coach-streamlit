@@ -1,6 +1,8 @@
 import os
+import sys
 import streamlit as st
 from openai import OpenAI
+import openai
 
 # =========================================
 # STREAMLIT CONFIG
@@ -11,6 +13,11 @@ st.set_page_config(
     page_icon="🧭",
     layout="wide"
 )
+
+# --- Simple environment debug in sidebar ---
+st.sidebar.write("📦 Environment info")
+st.sidebar.write(f"Python version: {sys.version.split()[0]}")
+st.sidebar.write(f"OpenAI version: {openai.__version__}")
 
 # --- LIGHT, SIMPLE NYL-STYLE ---
 CUSTOM_CSS = """
@@ -368,7 +375,6 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # =========================================
 # MODEL-CALL WRAPPERS (LOGIC PRESERVED)
 # =========================================
-
 
 def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_background, q6_networks) -> str:
     messages = [
