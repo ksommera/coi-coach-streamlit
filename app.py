@@ -196,7 +196,6 @@ Describe:
 - How advisor background and networks enhance these opportunities.
 
 COI SEARCH (Path A & B)
-- GPT-5.1 may use live browsing automatically.
 - Focus search on the advisor’s ZIP.
 - If <15 results → broaden geographically.
 - Use professional associations, local directories, schools, hospitals, small business clusters.
@@ -247,6 +246,7 @@ COMPLIANCE
 
 END SYSTEM PROMPT.
 """
+
 # =========================================
 # OPENAI CLIENT
 # =========================================
@@ -255,17 +255,17 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 # =========================================
-# GPT-5.1 CHAT COMPLETION HELPER
+# CHAT COMPLETION HELPER (BROWSING-CAPABLE MODEL)
 # =========================================
 
 def _run_chat_completion(user_input: str, max_completion_tokens: int) -> str:
     """
-    Wrapper for GPT-5.1 with automatic browsing.
-    No 'tools' parameter needed — GPT-5.1 performs web search implicitly.
+    Wrapper for a browsing-capable model (gpt-4o-mini-omni).
+    No explicit tools parameter needed here.
     """
     try:
         response = client.chat.completions.create(
-            model="gpt-5.1",
+            model="gpt-4o-mini-omni",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_input}
@@ -360,7 +360,7 @@ with col2:
         <b>How this works</b><br>
         • Choose a path<br>
         • Answer a few questions<br>
-        • GPT-5.1 will automatically browse the web<br><br>
+        • The model will automatically use web search when needed<br><br>
         <span style="font-size:0.82rem;color:#6b7280;">Always verify COIs and follow NYL compliance.</span>
     </div>
     """, unsafe_allow_html=True)
@@ -413,7 +413,7 @@ st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 
 
 # =========================================
-# PATH A — FULL-WIDTH UI (first half)
+# PATH A — FULL-WIDTH UI
 # =========================================
 
 if st.session_state.selected_path == "A":
@@ -432,7 +432,7 @@ if st.session_state.selected_path == "A":
         """, unsafe_allow_html=True)
 
         q1 = st.text_input(
-            "", 
+            "",
             placeholder="e.g., 07302",
             key="qa_zip"
         )
@@ -487,7 +487,7 @@ if st.session_state.selected_path == "A":
 
         st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
 
-        # NOTE: Q4–Q6 and submit button continue in PART 4.
+
         # ========================
         # Q4 — Communities / Affinity Groups
         # ========================
@@ -557,7 +557,6 @@ if st.session_state.selected_path == "A":
             height=70,
             key="qa_networks"
         )
-
 
         # ========================
         # SUBMIT BUTTON — PATH A
