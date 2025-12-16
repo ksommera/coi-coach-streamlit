@@ -373,10 +373,10 @@ END OF SYSTEM RULES (HYBRID PROMPT).
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # =========================================
-# MODEL-CALL WRAPPERS (CHAT COMPLETIONS)
+# MODEL-CALL HELPERS (CHAT COMPLETIONS)
 # =========================================
 
-def _run_chat_completion(user_input: str, max_output_tokens: int) -> str:
+def _run_chat_completion(user_input: str, max_tokens: int) -> str:
     """
     Helper to call gpt-5.1 with web_search using chat.completions.
     """
@@ -388,17 +388,18 @@ def _run_chat_completion(user_input: str, max_output_tokens: int) -> str:
                 {"role": "user", "content": user_input},
             ],
             tools=[{"type": "web_search"}],
-            max_output_tokens=max_output_tokens,
+            max_tokens=max_tokens,
         )
         msg = response.choices[0].message
-        # message.content is already a string in the new SDK
         return msg.content or ""
     except Exception as e:
         return f"⚠️ Error while calling OpenAI: `{e}`"
 
 
 def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_background, q6_networks) -> str:
-    """Path A — Personalized COI Strategy with COI List."""
+    """
+    Path A — Personalized COI Strategy with COI List.
+    """
     user_input = (
         "You are running PATH A — Personalized COI Strategy with COI List.\n\n"
         "Treat the following as answers you already collected in your Q1–Q6 workflow:\n\n"
@@ -417,11 +418,14 @@ def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_backgrou
         "Follow all guardrails, broadening rules, and end with:\n"
         "\"Would you like more COIs?  I can add more (up to 125 total), or we can finish with your summary.\""
     )
-    return _run_chat_completion(user_input, max_output_tokens=2000)
+
+    return _run_chat_completion(user_input, max_tokens=2000)
 
 
 def run_path_b_model(zip_code, coi_type, extra_context) -> str:
-    """Path B — Quick COI Lookup."""
+    """
+    Path B — Quick COI Lookup.
+    """
     user_input = (
         "You are running PATH B — Quick COI Lookup.\n\n"
         f"ZIP code: {zip_code}\n"
@@ -435,7 +439,9 @@ def run_path_b_model(zip_code, coi_type, extra_context) -> str:
         "End with the exact line:\n"
         "\"Would you like more COIs?  I can add more (up to 125 total), or we can finish with your summary.\""
     )
-    return _run_chat_completion(user_input, max_output_tokens=1500)
+
+    return _run_chat_completion(user_input, max_tokens=1500)
+
 
 # =========================================
 # SESSION STATE
