@@ -373,8 +373,29 @@ END OF SYSTEM RULES (HYBRID PROMPT).
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # =========================================
-# MODEL-CALL WRAPPERS (RESPONSES API)
+# MODEL-CALL WRAPPERS (CHAT COMPLETIONS)
 # =========================================
+
+def _run_chat_completion(user_input: str, max_output_tokens: int) -> str:
+    """
+    Helper to call gpt-5.1 with web_search using chat.completions.
+    """
+    try:
+        response = client.chat.completions.create(
+            model="gpt-5.1",
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_input},
+            ],
+            tools=[{"type": "web_search"}],
+            max_output_tokens=max_output_tokens,
+        )
+        msg = response.choices[0].message
+        # message.content is already a string in the new SDK
+        return msg.content or ""
+    except Exception as e:
+        return f"⚠️ Error while calling OpenAI: `{e}`"
+
 
 def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_background, q6_networks) -> str:
     """Path A — Personalized COI Strategy with COI List."""
@@ -396,18 +417,7 @@ def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_backgrou
         "Follow all guardrails, broadening rules, and end with:\n"
         "\"Would you like more COIs?  I can add more (up to 125 total), or we can finish with your summary.\""
     )
-
-    try:
-        response = client.responses.create(
-            model="gpt-5.1",
-            instructions=SYSTEM_PROMPT,
-            input=user_input,
-            tools=[{"type": "web_search"}],
-            max_output_tokens=2000,
-        )
-        return response.output_text
-    except Exception as e:
-        return f"⚠️ Error while calling OpenAI for Path A: `{e}`"
+    return _run_chat_completion(user_input, max_output_tokens=2000)
 
 
 def run_path_b_model(zip_code, coi_type, extra_context) -> str:
@@ -425,19 +435,7 @@ def run_path_b_model(zip_code, coi_type, extra_context) -> str:
         "End with the exact line:\n"
         "\"Would you like more COIs?  I can add more (up to 125 total), or we can finish with your summary.\""
     )
-
-    try:
-        response = client.responses.create(
-            model="gpt-5.1",
-            instructions=SYSTEM_PROMPT,
-            input=user_input,
-            tools=[{"type": "web_search"}],
-            max_output_tokens=1500,
-        )
-        return response.output_text
-    except Exception as e:
-        return f"⚠️ Error while calling OpenAI for Path B: `{e}`"
-
+    return _run_chat_completion(user_input, max_output_tokens=1500)
 
 # =========================================
 # SESSION STATE
