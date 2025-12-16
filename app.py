@@ -373,82 +373,70 @@ END OF SYSTEM RULES (HYBRID PROMPT).
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # =========================================
-# MODEL-CALL WRAPPERS (LOGIC PRESERVED)
+# MODEL-CALL WRAPPERS (RESPONSES API)
 # =========================================
 
 def run_path_a_model(q1_zip, q2_segments, q3_events, q4_communities, q5_background, q6_networks) -> str:
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {
-            "role": "user",
-            "content": (
-                "You are running PATH A — Personalized COI Strategy with COI List.\n\n"
-                "Treat the following as answers you already collected in your Q1–Q6 workflow:\n\n"
-                f"Q1 – Main ZIP code: {q1_zip}\n"
-                f"Q2 – Target segments: {q2_segments}\n"
-                f"Q3 – Common life events: {q3_events}\n"
-                f"Q4 – Communities / affinity groups: {q4_communities}\n"
-                f"Q5 – Advisor past professional background: {q5_background}\n"
-                f"Q6 – Warm networks already available: {q6_networks}\n\n"
-                "Using the COI System Rules, do the following in ONE response:\n"
-                "1) Build the full COI Intelligence Report (Client Focus Overview table, Opportunity Themes, "
-                "Priority COI Categories, COI Opportunity Channels).\n"
-                "2) Immediately run live web search (via the web_search tool) to find real COIs and present the "
-                "first batch of 20–25 COIs using the required table:\n"
-                "| Name | Role/Specialty | Organization + Link | Public Contact | Why They Fit |\n\n"
-                "Follow all guardrails, broadening rules, and end with:\n"
-                "\"Would you like more COIs?  I can add more (up to 125 total), or we can finish with your summary.\""
-            ),
-        },
-    ]
-
-    response = client.responses.create(
-        model="gpt-5.1",
-        input=messages,
-        tools=[{"type": "web_search"}],
-        max_output_tokens=2000,
+    """Path A — Personalized COI Strategy with COI List."""
+    user_input = (
+        "You are running PATH A — Personalized COI Strategy with COI List.\n\n"
+        "Treat the following as answers you already collected in your Q1–Q6 workflow:\n\n"
+        f"Q1 – Main ZIP code: {q1_zip}\n"
+        f"Q2 – Target segments: {q2_segments}\n"
+        f"Q3 – Common life events: {q3_events}\n"
+        f"Q4 – Communities / affinity groups: {q4_communities}\n"
+        f"Q5 – Advisor past professional background: {q5_background}\n"
+        f"Q6 – Warm networks already available: {q6_networks}\n\n"
+        "Using the COI System Rules, do the following in ONE response:\n"
+        "1) Build the full COI Intelligence Report (Client Focus Overview table, Opportunity Themes, "
+        "Priority COI Categories, COI Opportunity Channels).\n"
+        "2) Immediately run live web search (via the web_search tool) to find real COIs and present the "
+        "first batch of 20–25 COIs using the required table:\n"
+        "| Name | Role/Specialty | Organization + Link | Public Contact | Why They Fit |\n\n"
+        "Follow all guardrails, broadening rules, and end with:\n"
+        "\"Would you like more COIs?  I can add more (up to 125 total), or we can finish with your summary.\""
     )
 
-    content_parts = []
-    for item in response.output[0].content:
-        if item.type == "output_text":
-            content_parts.append(item.text)
-    return "\n".join(content_parts)
+    try:
+        response = client.responses.create(
+            model="gpt-5.1",
+            instructions=SYSTEM_PROMPT,
+            input=user_input,
+            tools=[{"type": "web_search"}],
+            max_output_tokens=2000,
+        )
+        return response.output_text
+    except Exception as e:
+        return f"⚠️ Error while calling OpenAI for Path A: `{e}`"
 
 
 def run_path_b_model(zip_code, coi_type, extra_context) -> str:
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {
-            "role": "user",
-            "content": (
-                "You are running PATH B — Quick COI Lookup.\n\n"
-                f"ZIP code: {zip_code}\n"
-                f"Requested COI type(s): {coi_type}\n"
-                f"Extra context from advisor (optional, may be empty): {extra_context}\n\n"
-                "Skip the Intelligence Report. Using the COI System Rules, immediately run live web search "
-                "(via the web_search tool) and return ONLY the first COI batch:\n"
-                "- 20–25 COIs if possible, applying the broadening rules\n"
-                "- Required table format:\n"
-                "| Name | Role/Specialty | Organization + Link | Public Contact | Why They Fit |\n\n"
-                "End with the exact line:\n"
-                "\"Would you like more COIs?  I can add more (up to 125 total), or we can finish with your summary.\""
-            ),
-        },
-    ]
-
-    response = client.responses.create(
-        model="gpt-5.1",
-        input=messages,
-        tools=[{"type": "web_search"}],
-        max_output_tokens=1500,
+    """Path B — Quick COI Lookup."""
+    user_input = (
+        "You are running PATH B — Quick COI Lookup.\n\n"
+        f"ZIP code: {zip_code}\n"
+        f"Requested COI type(s): {coi_type}\n"
+        f"Extra context from advisor (optional, may be empty): {extra_context}\n\n"
+        "Skip the Intelligence Report. Using the COI System Rules, immediately run live web search "
+        "(via the web_search tool) and return ONLY the first COI batch:\n"
+        "- 20–25 COIs if possible, applying the broadening rules\n"
+        "- Required table format:\n"
+        "| Name | Role/Specialty | Organization + Link | Public Contact | Why They Fit |\n\n"
+        "End with the exact line:\n"
+        "\"Would you like more COIs?  I can add more (up to 125 total), or we can finish with your summary.\""
     )
 
-    content_parts = []
-    for item in response.output[0].content:
-        if item.type == "output_text":
-            content_parts.append(item.text)
-    return "\n".join(content_parts)
+    try:
+        response = client.responses.create(
+            model="gpt-5.1",
+            instructions=SYSTEM_PROMPT,
+            input=user_input,
+            tools=[{"type": "web_search"}],
+            max_output_tokens=1500,
+        )
+        return response.output_text
+    except Exception as e:
+        return f"⚠️ Error while calling OpenAI for Path B: `{e}`"
 
 
 # =========================================
@@ -665,130 +653,4 @@ if st.session_state.selected_path == "A":
             height=70,
         )
 
-        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
-
-        # Q6/6 — What warm networks do you already have?
-        st.markdown(
-            '<div class="qblock">'
-            '<div class="qblock-title">Q6/6 — What warm networks do you already have?</div>'
-            '<div class="qblock-help">'
-            'Examples: former colleagues, parent groups, alumni, small business owners.'
-            '</div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        q6_networks = st.text_area(
-            "",
-            placeholder="e.g., Former colleagues, alumni network, daycare parents, chamber of commerce",
-            height=70,
-        )
-
-        submit_a = st.form_submit_button("Generate Intelligence Report & First COI Batch")
-
-    if submit_a:
-        if not q1_zip:
-            st.warning("Please enter at least your main ZIP code to run Path A.")
-        else:
-            with st.spinner("Generating your Intelligence Report and first COI batch..."):
-                st.session_state.path_a_result = run_path_a_model(
-                    q1_zip=q1_zip,
-                    q2_segments=q2_segments,
-                    q3_events=q3_events,
-                    q4_communities=q4_communities,
-                    q5_background=q5_background,
-                    q6_networks=q6_networks,
-                )
-
-    if st.session_state.path_a_result:
-        st.markdown("#### 🧠 Intelligence Report & First COI Batch")
-        st.markdown('<div class="result-card">', unsafe_allow_html=True)
-        st.markdown(st.session_state.path_a_result)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-# =========================================
-# PATH B UI (FULL WIDTH)
-# =========================================
-
-elif st.session_state.selected_path == "B":
-
-    st.markdown("#### 2️⃣ Path B — Quick COI Lookup")
-
-    with st.form("path_b_form"):
-        st.markdown("### Quick lookup inputs")
-
-        # ZIP
-        st.markdown(
-            '<div class="qblock">'
-            '<div class="qblock-title">ZIP code</div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        zip_b = st.text_input("", placeholder="e.g., 07302")
-
-        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
-
-        # COI type
-        st.markdown(
-            '<div class="qblock">'
-            '<div class="qblock-title">COI type</div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        coi_type = st.selectbox(
-            "",
-            [
-                "CPA / Tax Advisor",
-                "Estate Planning Attorney",
-                "Immigration Attorney",
-                "Family Law / Divorce Attorney",
-                "Realtor",
-                "Mortgage Lender / Broker",
-                "Pediatrician / OB-GYN",
-                "School / Education Professional",
-                "Business Banker / RM",
-                "Business Consultant / Career Coach",
-                "Community / Cultural Organization",
-                "Other / Mixed COIs",
-            ],
-        )
-
-        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
-
-        # Extra context
-        st.markdown(
-            '<div class="qblock">'
-            '<div class="qblock-title">Optional: extra context about your clients or focus</div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        extra_context = st.text_area(
-            "",
-            placeholder="e.g., French-speaking expat professionals, tech employees with stock comp, small business owners",
-            height=70,
-        )
-
-        submit_b = st.form_submit_button("Find COIs Now")
-
-    if submit_b:
-        if not zip_b:
-            st.warning("Please enter a ZIP code to run Path B.")
-        else:
-            with st.spinner("Finding COIs in your area..."):
-                st.session_state.path_b_result = run_path_b_model(
-                    zip_code=zip_b,
-                    coi_type=coi_type,
-                    extra_context=extra_context,
-                )
-
-    if st.session_state.path_b_result:
-        st.markdown("#### 📋 COI List – First Batch")
-        st.markdown('<div class="result-card">', unsafe_allow_html=True)
-        st.markdown(st.session_state.path_b_result)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-# =========================================
-# IDLE STATE (NO PATH SELECTED)
-# =========================================
-
-else:
-    st.write("Choose **Path 1** or **Path 2** above to get started.")
+        st.markdown('<div class="qsep'></div>', unsafe_allow_html=True)
