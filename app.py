@@ -255,17 +255,17 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 # =========================================
-# CHAT COMPLETION HELPER (BROWSING-CAPABLE MODEL)
+# CHAT COMPLETION HELPER (BROWSING-CAPABLE SEARCH MODEL)
 # =========================================
 
 def _run_chat_completion(user_input: str, max_completion_tokens: int) -> str:
     """
-    Wrapper for a browsing-capable model (gpt-4o-mini-omni).
-    No explicit tools parameter needed here.
+    Wrapper for a web-search-capable model (gpt-4o-mini-search-preview).
+    This model is designed for web search via Chat Completions.
     """
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini-omni",
+            model="gpt-4o-mini-search-preview",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_input}
