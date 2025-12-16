@@ -653,4 +653,130 @@ if st.session_state.selected_path == "A":
             height=70,
         )
 
-        st.markdown('<div class="qsep'></div>', unsafe_allow_html=True)
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # Q6/6 — What warm networks do you already have?
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Q6/6 — What warm networks do you already have?</div>'
+            '<div class="qblock-help">'
+            'Examples: former colleagues, parent groups, alumni, small business owners.'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        q6_networks = st.text_area(
+            "",
+            placeholder="e.g., Former colleagues, alumni network, daycare parents, chamber of commerce",
+            height=70,
+        )
+
+        submit_a = st.form_submit_button("Generate Intelligence Report & First COI Batch")
+
+    if submit_a:
+        if not q1_zip:
+            st.warning("Please enter at least your main ZIP code to run Path A.")
+        else:
+            with st.spinner("Generating your Intelligence Report and first COI batch..."):
+                st.session_state.path_a_result = run_path_a_model(
+                    q1_zip=q1_zip,
+                    q2_segments=q2_segments,
+                    q3_events=q3_events,
+                    q4_communities=q4_communities,
+                    q5_background=q5_background,
+                    q6_networks=q6_networks,
+                )
+
+    if st.session_state.path_a_result:
+        st.markdown("#### 🧠 Intelligence Report & First COI Batch")
+        st.markdown('<div class="result-card">', unsafe_allow_html=True)
+        st.markdown(st.session_state.path_a_result)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+# =========================================
+# PATH B UI (FULL WIDTH)
+# =========================================
+
+elif st.session_state.selected_path == "B":
+
+    st.markdown("#### 2️⃣ Path B — Quick COI Lookup")
+
+    with st.form("path_b_form"):
+        st.markdown("### Quick lookup inputs")
+
+        # ZIP
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">ZIP code</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        zip_b = st.text_input("", placeholder="e.g., 07302")
+
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # COI type
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">COI type</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        coi_type = st.selectbox(
+            "",
+            [
+                "CPA / Tax Advisor",
+                "Estate Planning Attorney",
+                "Immigration Attorney",
+                "Family Law / Divorce Attorney",
+                "Realtor",
+                "Mortgage Lender / Broker",
+                "Pediatrician / OB-GYN",
+                "School / Education Professional",
+                "Business Banker / RM",
+                "Business Consultant / Career Coach",
+                "Community / Cultural Organization",
+                "Other / Mixed COIs",
+            ],
+        )
+
+        st.markdown('<div class="qsep"></div>', unsafe_allow_html=True)
+
+        # Extra context
+        st.markdown(
+            '<div class="qblock">'
+            '<div class="qblock-title">Optional: extra context about your clients or focus</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        extra_context = st.text_area(
+            "",
+            placeholder="e.g., French-speaking expat professionals, tech employees with stock comp, small business owners",
+            height=70,
+        )
+
+        submit_b = st.form_submit_button("Find COIs Now")
+
+    if submit_b:
+        if not zip_b:
+            st.warning("Please enter a ZIP code to run Path B.")
+        else:
+            with st.spinner("Finding COIs in your area..."):
+                st.session_state.path_b_result = run_path_b_model(
+                    zip_code=zip_b,
+                    coi_type=coi_type,
+                    extra_context=extra_context,
+                )
+
+    if st.session_state.path_b_result:
+        st.markdown("#### 📋 COI List – First Batch")
+        st.markdown('<div class="result-card">', unsafe_allow_html=True)
+        st.markdown(st.session_state.path_b_result)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+# =========================================
+# IDLE STATE (NO PATH SELECTED)
+# =========================================
+
+else:
+    st.write("Choose **Path 1** or **Path 2** above to get started.")
